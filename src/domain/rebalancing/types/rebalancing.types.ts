@@ -9,3 +9,10 @@ export type HoldingsType = {
   quotePool?: string;
   pool?: string;
 };
+
+export type OpenMarketType = HoldingsType & DirectPoolMarket;
+
+export type DirectPoolMarket = {
+  marketRatio: string;
+  difference: string;
+};
