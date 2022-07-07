@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
+import { EngineModule } from './services/hive-engine-api/engine.module';
 
 @Module({
-  imports: [],
+  imports: [EngineModule],
   controllers: [],
   providers: [],
 })
