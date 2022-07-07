@@ -15,6 +15,7 @@ import {
   EngineProxyType,
   EngineQueryType,
   EngineRewardPoolType,
+  EngineTokenType,
   EngineVotingPowerType,
   MarketPoolType,
 } from './types';
@@ -165,5 +166,17 @@ export class HiveEngineClient implements HiveEngineClientInterface {
         query,
       },
     })) as EngineBalanceType[];
+  }
+
+  async getTokens(query: object): Promise<EngineTokenType[]> {
+    return (await this.engineProxy({
+      method: ENGINE_METHOD.FIND,
+      endpoint: ENGINE_ENDPOINT.CONTRACTS,
+      params: {
+        contract: ENGINE_CONTRACT.TOKENS.NAME,
+        table: ENGINE_CONTRACT.TOKENS.TABLE.TOKENS,
+        query,
+      },
+    })) as EngineTokenType[];
   }
 }

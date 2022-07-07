@@ -58,6 +58,7 @@ export const ENGINE_CONTRACT = Object.freeze({
     NAME: 'tokens',
     TABLE: {
       BALANCES: 'balances',
+      TOKENS: 'tokens',
     },
     ACTION: {
       TRANSFER: 'transfer',

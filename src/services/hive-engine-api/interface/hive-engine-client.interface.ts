@@ -2,6 +2,7 @@ import {
   EngineBalanceType,
   EngineBlockType,
   EngineRewardPoolType,
+  EngineTokenType,
   EngineVotingPowerType,
   MarketPoolType,
 } from '../types';
@@ -23,4 +24,6 @@ export interface HiveEngineClientInterface {
   getTokenBalance(account: string, symbol: string): Promise<EngineBalanceType>;
 
   getTokenBalances(query: object): Promise<EngineBalanceType[]>;
+
+  getTokens(query: object): Promise<EngineTokenType[]>;
 }
