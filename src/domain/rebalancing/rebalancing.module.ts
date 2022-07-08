@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { RebalancingProvider } from './rebalancing-provider';
+import { PersistenceModule } from '../../persistence/persistence.module';
 
 @Module({
-  imports: [],
+  imports: [PersistenceModule],
   providers: [RebalancingProvider],
   exports: [RebalancingProvider],
 })

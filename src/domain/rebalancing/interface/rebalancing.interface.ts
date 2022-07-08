@@ -2,10 +2,11 @@ import {
   EngineBalanceType,
   MarketPoolType,
 } from '../../../services/hive-engine-api/types';
-import { HoldingsType, OpenMarketType } from '../types';
+import { HoldingsType, OpenMarketType, UserRebalanceTableType } from '../types';
+import { UserRebalancingDocumentType } from '../../../persistence/user-rebalancing/types';
 
 export interface RebalancingInterface {
-  getUserRebalanceTable(account: string): Promise<void>;
+  getUserRebalanceTable(account: string): Promise<UserRebalanceTableType>;
 }
 
 export interface CalcHoldingsInterface {
@@ -31,4 +32,9 @@ export interface GetIndirectPoolMarketInterface {
   basePool: MarketPoolType;
   quotePool: MarketPoolType;
   market: OpenMarketType;
+}
+
+export interface AddActiveStatusOnPairsInterface {
+  holdings: HoldingsType[];
+  user: UserRebalancingDocumentType;
 }

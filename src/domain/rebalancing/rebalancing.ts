@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
+  AddActiveStatusOnPairsInterface,
   CalcHoldingsInterface,
   CalcOpenMarketInterface,
   CalcRatioInterface,
@@ -20,14 +21,23 @@ import {
 } from './constants';
 import * as _ from 'lodash';
 import { EngineBalanceType } from '../../services/hive-engine-api/types';
-import { DirectPoolMarket, HoldingsType, OpenMarketType } from './types';
+import {
+  DirectPoolMarket,
+  HoldingsType,
+  OpenMarketType,
+  UserRebalanceTableType,
+} from './types';
 import BigNumber from 'bignumber.js';
+import { USER_REBALANCING_PROVIDE } from '../../persistence/user-rebalancing/constants';
+import { UserRebalancingRepositoryInterface } from '../../persistence/user-rebalancing/interface';
 
 @Injectable()
 export class Rebalancing implements RebalancingInterface {
   constructor(
     @Inject(HIVE_ENGINE_PROVIDE.CLIENT)
     private readonly hiveEngineClient: HiveEngineClientInterface,
+    @Inject(USER_REBALANCING_PROVIDE.REPOSITORY)
+    private readonly userRebalancingRepository: UserRebalancingRepositoryInterface,
   ) {}
 
   async getNoZeroBalance(account: string): Promise<EngineBalanceType[]> {
@@ -149,7 +159,20 @@ export class Rebalancing implements RebalancingInterface {
     return openMarkets;
   }
 
-  async getUserRebalanceTable(account: string): Promise<void> {
+  addActiveStatusOnPairs({
+    user,
+    holdings,
+  }: AddActiveStatusOnPairsInterface): HoldingsType[] {
+    for (const holding of holdings) {
+      holding.active = user[holding.dbField];
+    }
+    return holdings;
+  }
+
+  async getUserRebalanceTable(
+    account: string,
+  ): Promise<UserRebalanceTableType> {
+    const user = await this.userRebalancingRepository.findOneOrCreate(account);
     const initialValues = [
       ...REBALANCE_PAIRS_WAIV,
       ...REBALANCE_PAIRS_HIVE,
@@ -158,14 +181,23 @@ export class Rebalancing implements RebalancingInterface {
     ] as HoldingsType[];
     const balances = await this.getNoZeroBalance(account);
     const holdings = this.calcHoldings({ balances, initialValues });
-    // const tokens = await this.hiveEngineClient.getTokens({
-    //   symbol: { $in: ENGINE_TOKENS_FOR_PRECISION },
-    // });
+    const holdingsWithStatus = this.addActiveStatusOnPairs({ user, holdings });
+
     const pools = await this.hiveEngineClient.getMarketPools({
       tokenPair: { $in: REBALANCING_POOLS },
     });
 
-    const openMarket = this.calcOpenMarket({ holdings, pools });
-    console.log()
+    const openMarket = this.calcOpenMarket({
+      holdings: holdingsWithStatus,
+      pools,
+    });
+
+    // const tokens = await this.hiveEngineClient.getTokens({
+    //   symbol: { $in: ENGINE_TOKENS_FOR_PRECISION },
+    // });
+    return {
+      differencePercent: user.differencePercent,
+      table: openMarket,
+    };
   }
 }
