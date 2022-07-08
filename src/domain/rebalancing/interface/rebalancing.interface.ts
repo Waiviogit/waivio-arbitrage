@@ -10,6 +10,7 @@ export interface RebalancingInterface {
 
 export interface CalcHoldingsInterface {
   balances: EngineBalanceType[];
+  initialValues: HoldingsType[];
 }
 
 export interface CalcOpenMarketInterface {
@@ -20,6 +21,10 @@ export interface CalcOpenMarketInterface {
 export interface GetDirectPoolMarketInterface {
   pool: MarketPoolType;
   market: OpenMarketType;
+}
+
+export interface CalcRatioInterface extends GetDirectPoolMarketInterface {
+  key: string;
 }
 
 export interface GetIndirectPoolMarketInterface {

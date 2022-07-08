@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   CalcHoldingsInterface,
   CalcOpenMarketInterface,
+  CalcRatioInterface,
   GetDirectPoolMarketInterface,
   GetIndirectPoolMarketInterface,
   RebalancingInterface,
@@ -37,15 +38,11 @@ export class Rebalancing implements RebalancingInterface {
     return _.filter(balances, (token) => parseFloat(token.balance) > 0);
   }
 
-  calcHoldings({ balances }: CalcHoldingsInterface): HoldingsType[] {
-    const rebalancePairs = [
-      ...REBALANCE_PAIRS_WAIV,
-      ...REBALANCE_PAIRS_HIVE,
-      ...REBALANCE_PAIRS_BTC,
-      ...REBALANCE_PAIRS_ETH,
-    ] as HoldingsType[];
-
-    for (const rebalancePair of rebalancePairs) {
+  calcHoldings({
+    balances,
+    initialValues,
+  }: CalcHoldingsInterface): HoldingsType[] {
+    for (const rebalancePair of initialValues) {
       const baseBalance = balances.find((b) => b.symbol === rebalancePair.base);
       const quoteBalance = balances.find(
         (b) => b.symbol === rebalancePair.quote,
@@ -62,7 +59,15 @@ export class Rebalancing implements RebalancingInterface {
         rebalancePair.holdingsRatio = '0';
       }
     }
-    return rebalancePairs;
+    return initialValues;
+  }
+
+  calcRatio({ pool, market, key }: CalcRatioInterface): string {
+    const [base] = pool.tokenPair.split(':');
+    const isSameBase = base === market[key];
+    return isSameBase
+      ? new BigNumber(pool.quoteQuantity).div(pool.baseQuantity).toFixed()
+      : new BigNumber(pool.baseQuantity).div(pool.quoteQuantity).toFixed();
   }
 
   getDiffPercent(before: string, after: string): string {
@@ -79,11 +84,7 @@ export class Rebalancing implements RebalancingInterface {
     pool,
     market,
   }: GetDirectPoolMarketInterface): DirectPoolMarket {
-    const [base] = pool.tokenPair.split(':');
-    const isSameBase = base === market.base;
-    const marketRatio = isSameBase
-      ? new BigNumber(pool.quoteQuantity).div(pool.baseQuantity).toFixed()
-      : new BigNumber(pool.baseQuantity).div(pool.quoteQuantity).toFixed();
+    const marketRatio = this.calcRatio({ pool, market, key: 'base' });
 
     return {
       marketRatio,
@@ -96,19 +97,21 @@ export class Rebalancing implements RebalancingInterface {
     quotePool,
     basePool,
   }: GetIndirectPoolMarketInterface): DirectPoolMarket {
-    const [base] = basePool.tokenPair.split(':');
-    const isSameBase = base === market.base;
-    const marketRatioBase = isSameBase
-      ? new BigNumber(basePool.quoteQuantity).div(basePool.baseQuantity)
-      : new BigNumber(basePool.baseQuantity).div(basePool.quoteQuantity);
+    const marketRatioBase = this.calcRatio({
+      pool: basePool,
+      market,
+      key: 'base',
+    });
 
-    const [baseQuote] = quotePool.tokenPair.split(':');
-    const isSameQuote = baseQuote === market.quote;
-    const marketRatioQuote = isSameQuote
-      ? new BigNumber(quotePool.quoteQuantity).div(quotePool.baseQuantity)
-      : new BigNumber(quotePool.baseQuantity).div(quotePool.quoteQuantity);
+    const marketRatioQuote = this.calcRatio({
+      pool: quotePool,
+      market,
+      key: 'quote',
+    });
 
-    const marketRatio = marketRatioBase.div(marketRatioQuote).toFixed();
+    const marketRatio = new BigNumber(marketRatioBase)
+      .div(marketRatioQuote)
+      .toFixed();
 
     return {
       marketRatio,
@@ -147,8 +150,14 @@ export class Rebalancing implements RebalancingInterface {
   }
 
   async getUserRebalanceTable(account: string): Promise<void> {
+    const initialValues = [
+      ...REBALANCE_PAIRS_WAIV,
+      ...REBALANCE_PAIRS_HIVE,
+      ...REBALANCE_PAIRS_BTC,
+      ...REBALANCE_PAIRS_ETH,
+    ] as HoldingsType[];
     const balances = await this.getNoZeroBalance(account);
-    const holdings = this.calcHoldings({ balances });
+    const holdings = this.calcHoldings({ balances, initialValues });
     // const tokens = await this.hiveEngineClient.getTokens({
     //   symbol: { $in: ENGINE_TOKENS_FOR_PRECISION },
     // });
@@ -157,6 +166,6 @@ export class Rebalancing implements RebalancingInterface {
     });
 
     const openMarket = this.calcOpenMarket({ holdings, pools });
-
+    console.log()
   }
 }
