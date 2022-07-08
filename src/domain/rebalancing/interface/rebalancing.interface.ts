@@ -4,9 +4,15 @@ import {
 } from '../../../services/hive-engine-api/types';
 import { HoldingsType, OpenMarketType, UserRebalanceTableType } from '../types';
 import { UserRebalancingDocumentType } from '../../../persistence/user-rebalancing/types';
+import { UserRebalancing } from '../../../persistence/user-rebalancing/user-rebalancing.schema';
 
 export interface RebalancingInterface {
   getUserRebalanceTable(account: string): Promise<UserRebalanceTableType>;
+
+  changeNotificationSettings({
+    account,
+    update,
+  }: ChangeNotificationSettingsInterface): Promise<UserRebalancingDocumentType>;
 }
 
 export interface CalcHoldingsInterface {
@@ -37,4 +43,9 @@ export interface GetIndirectPoolMarketInterface {
 export interface AddActiveStatusOnPairsInterface {
   holdings: HoldingsType[];
   user: UserRebalancingDocumentType;
+}
+
+export interface ChangeNotificationSettingsInterface {
+  account: string;
+  update: Omit<UserRebalancing, 'account'>;
 }

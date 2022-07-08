@@ -1,7 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REBALANCING_PROVIDE } from '../../../domain/rebalancing/constants';
-import { RebalancingInterface } from '../../../domain/rebalancing/interface';
+import {
+  ChangeNotificationSettingsInterface,
+  RebalancingInterface,
+} from '../../../domain/rebalancing/interface';
 import { UserRebalanceTableType } from '../../../domain/rebalancing/types';
+import { UserRebalancingDocumentType } from '../../../persistence/user-rebalancing/types';
 
 @Injectable()
 export class RebalancingService {
@@ -11,5 +15,12 @@ export class RebalancingService {
   ) {}
   async getUserBalance(account: string): Promise<UserRebalanceTableType> {
     return this.rebalancing.getUserRebalanceTable(account);
+  }
+
+  async changeNotificationSettings({
+    account,
+    update,
+  }: ChangeNotificationSettingsInterface): Promise<UserRebalancingDocumentType> {
+    return this.rebalancing.changeNotificationSettings({ account, update });
   }
 }

@@ -4,6 +4,7 @@ import {
   CalcHoldingsInterface,
   CalcOpenMarketInterface,
   CalcRatioInterface,
+  ChangeNotificationSettingsInterface,
   GetDirectPoolMarketInterface,
   GetIndirectPoolMarketInterface,
   RebalancingInterface,
@@ -30,6 +31,7 @@ import {
 import BigNumber from 'bignumber.js';
 import { USER_REBALANCING_PROVIDE } from '../../persistence/user-rebalancing/constants';
 import { UserRebalancingRepositoryInterface } from '../../persistence/user-rebalancing/interface';
+import { UserRebalancingDocumentType } from '../../persistence/user-rebalancing/types';
 
 @Injectable()
 export class Rebalancing implements RebalancingInterface {
@@ -199,5 +201,15 @@ export class Rebalancing implements RebalancingInterface {
       differencePercent: user.differencePercent,
       table: openMarket,
     };
+  }
+
+  async changeNotificationSettings({
+    account,
+    update,
+  }: ChangeNotificationSettingsInterface): Promise<UserRebalancingDocumentType> {
+    return this.userRebalancingRepository.findOneAndUpdate({
+      filter: { account },
+      update,
+    });
   }
 }
