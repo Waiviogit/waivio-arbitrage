@@ -4,6 +4,8 @@ import { ApiModule } from './api/api.module';
 import { DomainModule } from './domain/domain.module';
 import { DatabaseModule } from './database/database.module';
 import { PersistenceModule } from './persistence/persistence.module';
+import { RedisClientModule } from './redis/redis.module';
+import { BlockProcessorModule } from './processor/block-processor.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { PersistenceModule } from './persistence/persistence.module';
     EngineModule,
     ApiModule,
     DomainModule,
+    RedisClientModule,
+    BlockProcessorModule,
   ],
   controllers: [],
   providers: [],

@@ -1,6 +1,7 @@
 import { Logger, OnModuleInit } from '@nestjs/common';
 import { IBlockProcessor } from '../interfaces/redis-client.interfaces';
 import { createClient } from 'redis';
+import { configService } from '../../common/config';
 
 export class RedisClient
   implements OnModuleInit, IBlockProcessor {

@@ -23,6 +23,14 @@ class ConfigService {
   public getPort(): string {
     return this.getValue('PORT', true);
   }
+
+  getRedisConfig(): string {
+    const host = this.getValue('REDIS_HOST');
+    const port = this.getValue('REDIS_PORT');
+    const db = this.getValue('REDIS_DB');
+
+    return `redis://${host}:${port}/${db}`;
+  }
 }
 
 const configService = new ConfigService(process.env);

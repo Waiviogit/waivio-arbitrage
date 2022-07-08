@@ -1,16 +1,24 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { REDIS_PROVIDERS } from '../redis/constants/provider';
+import { IBlockProcessor } from '../redis/interfaces/redis-client.interfaces';
+import {
+  DEFAULT_START_ENGINE_BLOCK,
+  REDIS_KEY,
+} from '../redis/constants/redis.constants';
+import { HiveEngineClientInterface } from '../services/hive-engine-api/interface';
 
 @Injectable()
 export class BlockProcessor {
   private _currentBlock: number;
   private readonly _logger = new Logger(BlockProcessor.name);
   private readonly _redisBlockKey: string = REDIS_KEY.LAST_BLOCK;
-  private readonly _startDefaultBlock: number = DEFAULT_START_BLOCK_CAMPAIGN;
+  private readonly _startDefaultBlock: number = DEFAULT_START_ENGINE_BLOCK;
 
   constructor(
     @Inject(REDIS_PROVIDERS.MAIN)
     private readonly _processorClient: IBlockProcessor,
-    private readonly _hiveApiDomain: BlockchainApiService,
+    private readonly _hiveEngineApiDomain: HiveEngineClientInterface,
+    // тут будет другой парсер!
     @Inject(HIVE_PARSER_PROVIDERS.MAIN)
     private readonly _hiveParserDomain: IHiveParserDomain,
   ) {}
@@ -41,7 +49,7 @@ export class BlockProcessor {
   }
 
   private async _processBlock(blockNumber: number): Promise<boolean> {
-    const block = await this._hiveApiDomain.getBlock(blockNumber);
+    const block = await this._hiveEngineApiDomain.getBlock(blockNumber);
     if (block && (!block.transactions || !block.transactions[0])) {
       this._logger.log(`EMPTY BLOCK: ${blockNumber}`);
 
