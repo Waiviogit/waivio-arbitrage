@@ -1,10 +1,13 @@
 import { Global, Module } from '@nestjs/common';
 
-import { HiveEngineClientProvider } from './engine.provider';
+import {
+  HiveEngineClientProvider,
+  HiveEngineSwapHelperProvider,
+} from './engine.provider';
 
 @Global()
 @Module({
-  providers: [HiveEngineClientProvider],
-  exports: [HiveEngineClientProvider],
+  providers: [HiveEngineClientProvider, HiveEngineSwapHelperProvider],
+  exports: [HiveEngineClientProvider, HiveEngineSwapHelperProvider],
 })
 export class EngineModule {}
