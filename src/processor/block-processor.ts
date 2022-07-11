@@ -6,21 +6,25 @@ import {
   REDIS_KEY,
 } from '../redis/constants/redis.constants';
 import { HiveEngineClientInterface } from '../services/hive-engine-api/interface';
+import { IEngineParser } from '../domain/engine-parser/interfaces/engine-parser.interface';
+import { ENGINE_PARSER_PROVIDERS } from '../domain/engine-parser/constants/provider';
+import { HIVE_ENGINE_PROVIDE } from '../services/hive-engine-api/constants';
 
 @Injectable()
 export class BlockProcessor {
   private _currentBlock: number;
   private readonly _logger = new Logger(BlockProcessor.name);
+  // TODO какой тут ключ берется?
   private readonly _redisBlockKey: string = REDIS_KEY.LAST_BLOCK;
   private readonly _startDefaultBlock: number = DEFAULT_START_ENGINE_BLOCK;
 
   constructor(
     @Inject(REDIS_PROVIDERS.MAIN)
     private readonly _processorClient: IBlockProcessor,
+    @Inject(HIVE_ENGINE_PROVIDE.CLIENT)
     private readonly _hiveEngineApiDomain: HiveEngineClientInterface,
-    // тут будет другой парсер!
-    @Inject(HIVE_PARSER_PROVIDERS.MAIN)
-    private readonly _hiveParserDomain: IHiveParserDomain,
+    @Inject(ENGINE_PARSER_PROVIDERS.MAIN)
+    private readonly _engineParser: IEngineParser,
   ) {}
 
   async start(): Promise<void> {
@@ -49,6 +53,7 @@ export class BlockProcessor {
   }
 
   private async _processBlock(blockNumber: number): Promise<boolean> {
+    console.log('blockNumber', blockNumber);
     const block = await this._hiveEngineApiDomain.getBlock(blockNumber);
     if (block && (!block.transactions || !block.transactions[0])) {
       this._logger.log(`EMPTY BLOCK: ${blockNumber}`);
@@ -56,7 +61,7 @@ export class BlockProcessor {
       return true;
     }
     if (block && block.transactions && block.transactions[0]) {
-      await this._hiveParserDomain.parseHiveBlock(block);
+      await this._engineParser.parseEngineBlock(block.transactions);
 
       return true;
     }
