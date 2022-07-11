@@ -8,6 +8,8 @@ export type HoldingsType = {
   basePool?: string;
   quotePool?: string;
   pool?: string;
+  dbField: string;
+  active?: boolean;
 };
 
 export type OpenMarketType = HoldingsType & DirectPoolMarket;
@@ -15,4 +17,9 @@ export type OpenMarketType = HoldingsType & DirectPoolMarket;
 export type DirectPoolMarket = {
   marketRatio: string;
   difference: string;
+};
+
+export type UserRebalanceTableType = {
+  differencePercent: number;
+  table: OpenMarketType[];
 };

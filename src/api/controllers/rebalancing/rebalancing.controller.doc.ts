@@ -1,5 +1,6 @@
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { applyDecorators, HttpStatus } from '@nestjs/common';
+import {RebalanceTableDto, UserRebalancingDto} from '../../dto/rebalancing';
 
 export class RebalancingControllerDoc {
   static main(): ClassDecorator {
@@ -29,7 +30,21 @@ export class RebalancingControllerDoc {
       ApiResponse({
         status: HttpStatus.OK,
         description: 'rebalance table',
-        type: String,
+        type: RebalanceTableDto,
+      }),
+    );
+  }
+
+  static changeNotificationSettings(): MethodDecorator {
+    return applyDecorators(
+      ApiOperation({
+        summary: 'endpoint for change notifications settings',
+        description: 'endpoint for change notifications settings',
+      }),
+      ApiResponse({
+        status: HttpStatus.OK,
+        description: 'notifications settings',
+        type: UserRebalancingDto,
       }),
     );
   }
