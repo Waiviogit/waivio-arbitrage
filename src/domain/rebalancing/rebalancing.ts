@@ -196,7 +196,10 @@ export class Rebalancing implements RebalancingInterface {
     });
 
     for (const openMarketElement of openMarket as RebalanceTableRowType[]) {
-      if (openMarketElement.directPool === true) {
+      if (
+        openMarketElement.directPool === true &&
+        new BigNumber(openMarketElement.holdingsRatio).gt(0)
+      ) {
         const toSwap = new BigNumber(openMarketElement.difference).lt(0)
           ? 'quote'
           : 'base';
