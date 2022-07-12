@@ -14,6 +14,12 @@ export type HoldingsType = {
 
 export type OpenMarketType = HoldingsType & DirectPoolMarket;
 
+export type RebalanceTableRowType = OpenMarketType & {
+  earn: string;
+  rebalanceBase: string;
+  rebalanceQuote: string;
+};
+
 export type DirectPoolMarket = {
   marketRatio: string;
   difference: string;
@@ -21,5 +27,5 @@ export type DirectPoolMarket = {
 
 export type UserRebalanceTableType = {
   differencePercent: number;
-  table: OpenMarketType[];
+  table: RebalanceTableRowType[];
 };

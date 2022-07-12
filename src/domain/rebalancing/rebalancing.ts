@@ -10,7 +10,10 @@ import {
   RebalancingInterface,
 } from './interface';
 import { HIVE_ENGINE_PROVIDE } from '../../services/hive-engine-api/constants';
-import { HiveEngineClientInterface } from '../../services/hive-engine-api/interface';
+import {
+  HiveEngineClientInterface,
+  SwapHelperInterface,
+} from '../../services/hive-engine-api/interface';
 import {
   ENGINE_TOKENS_FOR_PRECISION,
   ENGINE_TOKENS_SUPPORTED,
@@ -26,6 +29,7 @@ import {
   DirectPoolMarket,
   HoldingsType,
   OpenMarketType,
+  RebalanceTableRowType,
   UserRebalanceTableType,
 } from './types';
 import BigNumber from 'bignumber.js';
@@ -38,6 +42,8 @@ export class Rebalancing implements RebalancingInterface {
   constructor(
     @Inject(HIVE_ENGINE_PROVIDE.CLIENT)
     private readonly hiveEngineClient: HiveEngineClientInterface,
+    @Inject(HIVE_ENGINE_PROVIDE.SWAP_HELPER)
+    private readonly swapHelper: SwapHelperInterface,
     @Inject(USER_REBALANCING_PROVIDE.REPOSITORY)
     private readonly userRebalancingRepository: UserRebalancingRepositoryInterface,
   ) {}
@@ -84,12 +90,7 @@ export class Rebalancing implements RebalancingInterface {
 
   getDiffPercent(before: string, after: string): string {
     if (new BigNumber(before).eq(0)) return '0';
-    return new BigNumber(after)
-      .minus(before)
-      .abs()
-      .div(before)
-      .times(100)
-      .toFixed();
+    return new BigNumber(after).minus(before).div(before).times(100).toFixed();
   }
 
   getDirectPoolMarket({
@@ -194,12 +195,85 @@ export class Rebalancing implements RebalancingInterface {
       pools,
     });
 
-    // const tokens = await this.hiveEngineClient.getTokens({
-    //   symbol: { $in: ENGINE_TOKENS_FOR_PRECISION },
-    // });
+    for (const openMarketElement of openMarket as RebalanceTableRowType[]) {
+      if (openMarketElement.directPool === true) {
+        const toSwap = new BigNumber(openMarketElement.difference).lt(0)
+          ? 'quote'
+          : 'base';
+
+        const percentToSwap = new BigNumber(openMarketElement.difference)
+          .div(2)
+          .div(100)
+          .abs()
+          .toFixed();
+
+        const quantityToSwap = new BigNumber(
+          openMarketElement[`${toSwap}Quantity`],
+        )
+          .times(percentToSwap)
+          .toFixed();
+
+        const pool = pools.find((p) => p.tokenPair === openMarketElement.pool);
+        const swapOutput = this.swapHelper.getSwapOutput({
+          symbol: openMarketElement[toSwap],
+          amountIn: quantityToSwap,
+          slippage: 0.005,
+          precision: '8',
+          tradeFeeMul: 0.9975,
+          pool,
+        });
+
+        const newBaseQuantity =
+          toSwap === 'quote'
+            ? new BigNumber(swapOutput.amountOut)
+                .plus(openMarketElement.baseQuantity)
+                .toFixed()
+            : new BigNumber(openMarketElement.baseQuantity)
+                .minus(quantityToSwap)
+                .toFixed();
+
+        const newQuoteQuantity =
+          toSwap === 'quote'
+            ? new BigNumber(openMarketElement.quoteQuantity)
+                .minus(quantityToSwap)
+                .toFixed()
+            : new BigNumber(openMarketElement.quoteQuantity)
+                .plus(swapOutput.amountOut)
+                .toFixed();
+
+        const ratio = new BigNumber(newQuoteQuantity)
+          .div(newBaseQuantity)
+          .toFixed();
+
+        const earn = this.getDiffPercent(
+          new BigNumber(openMarketElement.baseQuantity)
+            .times(openMarketElement.quoteQuantity)
+            .toFixed(),
+          new BigNumber(newBaseQuantity).times(newQuoteQuantity).toFixed(),
+        );
+        const rebalanceBase =
+          toSwap === 'quote'
+            ? `+ ${swapOutput.amountOut} ${openMarketElement.base}`
+            : `- ${quantityToSwap} ${openMarketElement.base}`;
+
+        const rebalanceQuote =
+          toSwap === 'quote'
+            ? `- ${quantityToSwap} ${openMarketElement.quote}`
+            : `+ ${swapOutput.amountOut} ${openMarketElement.quote}`;
+
+        openMarketElement.earn = earn;
+        openMarketElement.rebalanceBase = rebalanceBase;
+        openMarketElement.rebalanceQuote = rebalanceQuote;
+      } else {
+        openMarketElement.earn = '0';
+        openMarketElement.rebalanceBase = '0';
+        openMarketElement.rebalanceQuote = '0';
+      }
+    }
+
     return {
       differencePercent: user.differencePercent,
-      table: openMarket,
+      table: openMarket as RebalanceTableRowType[],
     };
   }
 
