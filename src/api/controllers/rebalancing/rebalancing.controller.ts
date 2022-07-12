@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { RebalancingService } from './rebalancing.service';
 import { RebalancingControllerDoc } from './rebalancing.controller.doc';
 import {
@@ -6,6 +6,7 @@ import {
   RebalanceTableDto,
   UserRebalancingDto,
 } from '../../dto/rebalancing';
+import { AuthGuard } from '../../guards';
 
 @Controller('rebalancing')
 @RebalancingControllerDoc.main()
@@ -21,6 +22,7 @@ export class RebalancingController {
   }
 
   @Patch(':account')
+  @UseGuards(AuthGuard)
   @RebalancingControllerDoc.changeNotificationSettings()
   async changeNotificationSettings(
     @Param('account') account: string,

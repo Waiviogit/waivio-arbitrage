@@ -49,3 +49,20 @@ export interface ChangeNotificationSettingsInterface {
   account: string;
   update: Omit<UserRebalancing, 'account'>;
 }
+export interface GetRebalanceTableRowsInterface {
+  openMarkets: OpenMarketType[];
+  pools: MarketPoolType[];
+}
+
+export interface GetEarnRebalanceInterface {
+  row: OpenMarketType;
+  pools: MarketPoolType[];
+}
+
+export interface GetRebalanceSwapOutputInterface {
+  row: OpenMarketType;
+  pools: MarketPoolType[];
+  toSwap: 'base' | 'quote';
+  quantityToSwap: string;
+  slippage?: number;
+}

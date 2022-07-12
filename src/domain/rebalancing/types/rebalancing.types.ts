@@ -29,3 +29,9 @@ export type UserRebalanceTableType = {
   differencePercent: number;
   table: RebalanceTableRowType[];
 };
+
+export type EarnRebalanceType = {
+  earn: string;
+  rebalanceBase: string;
+  rebalanceQuote: string;
+};

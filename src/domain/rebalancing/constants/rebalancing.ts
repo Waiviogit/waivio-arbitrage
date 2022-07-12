@@ -124,3 +124,7 @@ export const REBALANCE_PAIRS_ETH = [
     dbField: DB_REBALANCING_FIELD.ETH_HBD,
   },
 ];
+
+export const DEFAULT_SLIPPAGE = 0.005;
+export const DEFAULT_PRECISION = '8';
+export const DEFAULT_TRADE_FEE_MUL = 0.9975;
