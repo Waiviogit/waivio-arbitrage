@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 
-dotenv.config({ path: `${process.env.NODE_ENV || 'development'}.env` });
+dotenv.config();
 
 class ConfigService {
   constructor(private env: { [k: string]: string | undefined }) {}
