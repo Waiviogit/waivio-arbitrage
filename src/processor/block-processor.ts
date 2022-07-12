@@ -6,9 +6,9 @@ import {
   REDIS_KEY,
 } from '../redis/constants/redis.constants';
 import { HiveEngineClientInterface } from '../services/hive-engine-api/interface';
-import { IEngineParser } from '../domain/engine-parser/interfaces/engine-parser.interface';
-import { ENGINE_PARSER_PROVIDERS } from '../domain/engine-parser/constants/provider';
 import { HIVE_ENGINE_PROVIDE } from '../services/hive-engine-api/constants';
+import { ENGINE_PARSER_PROVIDERS } from './engine-parser/constants/provider';
+import { IEngineParser } from './engine-parser/interfaces/engine-parser.interface';
 
 @Injectable()
 export class BlockProcessor {

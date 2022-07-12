@@ -6,7 +6,6 @@ import { DatabaseModule } from './database/database.module';
 import { PersistenceModule } from './persistence/persistence.module';
 import { RedisClientModule } from './redis/redis.module';
 import { BlockProcessorModule } from './processor/block-processor.module';
-import { EngineParserModule } from './domain/engine-parser.module';
 
 @Module({
   imports: [
@@ -17,7 +16,6 @@ import { EngineParserModule } from './domain/engine-parser.module';
     DomainModule,
     RedisClientModule,
     BlockProcessorModule,
-    EngineParserModule,
   ],
   controllers: [],
   providers: [],
