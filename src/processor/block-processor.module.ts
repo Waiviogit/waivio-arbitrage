@@ -4,9 +4,15 @@ import { BlockProcessor } from './block-processor';
 import { EngineParserProvider } from './engine-parser.provider';
 import { RebalancingModule } from '../domain/rebalancing/rebalancing.module';
 import { UserRebalancingPersistenceModule } from '../persistence/user-rebalancing/user-rebalancing.persistence.module';
+import { NotificationSocketClient } from '../services/notification-socket/notification-socket.client';
 
 @Module({
-  imports: [EngineModule, RebalancingModule, UserRebalancingPersistenceModule],
+  imports: [
+    EngineModule,
+    RebalancingModule,
+    UserRebalancingPersistenceModule,
+    NotificationSocketClient,
+  ],
   providers: [BlockProcessor, EngineParserProvider],
 })
 export class BlockProcessorModule {}

@@ -31,6 +31,14 @@ class ConfigService {
 
     return `redis://${host}:${port}/${db}`;
   }
+
+  getWSUrl(): string {
+    return this.getValue('WS_URL');
+  }
+
+  getApiKey(): string {
+    return this.getValue('API_KEY');
+  }
 }
 
 const configService = new ConfigService(process.env);

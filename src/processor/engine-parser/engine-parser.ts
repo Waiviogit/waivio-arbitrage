@@ -14,7 +14,8 @@ import { UserRebalancingRepositoryInterface } from '../../persistence/user-rebal
 import { UserRebalancingDocumentType } from '../../persistence/user-rebalancing/types';
 import BigNumber from 'bignumber.js';
 import { OpenMarketType } from '../../domain/rebalancing/types';
-import { NotificationType } from './types/notification.type';
+import { NotificationSocketClient } from '../../services/notification-socket/notification-socket.client';
+import { NotificationDataType } from '../../services/notification-socket/types/notification.types';
 
 @Injectable()
 export class EngineParser implements IEngineParser {
@@ -23,14 +24,15 @@ export class EngineParser implements IEngineParser {
     private readonly _rebalancingDomain: RebalancingInterface,
     @Inject(USER_REBALANCING_PROVIDE.REPOSITORY)
     private readonly _userRebalancingRepository: UserRebalancingRepositoryInterface,
-  ) {
-  }
+    private readonly _notificationSocketClient: NotificationSocketClient,
+  ) {}
 
   async parseEngineBlock(transactions: EngineTransactionType[]): Promise<void> {
-    // TODO пока стоит дев, заменить на стейдж!
+    // TODO пока стоит дев, заменить на production!
     if (process.env.NODE_ENV !== 'development') return;
 
-    const marketPool = transactions.filter((transaction) =>
+    const marketPool = transactions.filter(
+      (transaction) =>
         transaction.contract === ENGINE_CONTRACT.MARKETPOOLS.NAME,
     );
     if (!marketPool.length) return;
@@ -42,7 +44,16 @@ export class EngineParser implements IEngineParser {
     const users = await this._getUsersToCheck(dbRebalancingPairs);
 
     const dataForNotifications = await this._checkUsersDifferences(users);
-    if (dataForNotifications) // tyt otpravka 4erez axios
+    if (dataForNotifications) {
+      // await this._notificationSocketClient.sendMessage(dataForNotifications);
+      await this._notificationSocketClient.sendMessage([
+        {
+          account: 'jessihollander',
+          differencePercent: '7',
+          tokenPair: 'bla',
+        },
+      ]);
+    }
   }
 
   /** --------------------------PRIVATE METHODS----------------------------------------*/
@@ -69,19 +80,20 @@ export class EngineParser implements IEngineParser {
     for (const el of poolTokens) {
       const token = el.includes('.') ? el.split('.')[1] : el;
       dbRebalancingPairs.push(
-      ...Object.keys(DB_REBALANCING_FIELD).filter((pair) =>
+        ...Object.keys(DB_REBALANCING_FIELD).filter((pair) =>
           pair.includes(token),
-    ));
+        ),
+      );
     }
 
     return dbRebalancingPairs;
   }
 
   private async _getUsersToCheck(
-    tokenPairs: string[]
+    tokenPairs: string[],
   ): Promise<UserRebalancingDocumentType[]> {
     const users = await this._userRebalancingRepository.find({
-      filter: { differencePercent: { $gt: 0 } }
+      filter: { differencePercent: { $gt: 0 } },
     });
 
     return users.filter((user) =>
@@ -93,7 +105,7 @@ export class EngineParser implements IEngineParser {
 
   private async _checkUsersDifferences(
     users: UserRebalancingDocumentType[],
-  ): Promise<NotificationType[]> {
+  ): Promise<NotificationDataType[]> {
     const dataForNotifications = [];
     for (const user of users) {
       const userAndMarketInfo =
@@ -119,7 +131,7 @@ export class EngineParser implements IEngineParser {
   private _prepareNotificationData(
     pools: OpenMarketType[],
     account: string,
-  ): NotificationType[] {
+  ): NotificationDataType[] {
     const dataForNotifications = [];
     for (const pool of pools) {
       dataForNotifications.push({
