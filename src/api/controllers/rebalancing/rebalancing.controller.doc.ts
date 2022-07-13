@@ -1,6 +1,7 @@
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { applyDecorators, HttpStatus } from '@nestjs/common';
-import {RebalanceTableDto, UserRebalancingDto} from '../../dto/rebalancing';
+import { RebalanceTableDto, UserRebalancingDto } from '../../dto/rebalancing';
+import { RebalanceSwapOutDto } from '../../dto/rebalancing/out/rebalance-swap-out.dto';
 
 export class RebalancingControllerDoc {
   static main(): ClassDecorator {
@@ -37,6 +38,10 @@ export class RebalancingControllerDoc {
 
   static changeNotificationSettings(): MethodDecorator {
     return applyDecorators(
+      ApiHeader({
+        name: 'access-token',
+        required: true,
+      }),
       ApiOperation({
         summary: 'endpoint for change notifications settings',
         description: 'endpoint for change notifications settings',
@@ -45,6 +50,20 @@ export class RebalancingControllerDoc {
         status: HttpStatus.OK,
         description: 'notifications settings',
         type: UserRebalancingDto,
+      }),
+    );
+  }
+
+  static getUserSwapParams(): MethodDecorator {
+    return applyDecorators(
+      ApiOperation({
+        summary: 'endpoint to get swap params',
+        description: 'endpoint to get swap params',
+      }),
+      ApiResponse({
+        status: HttpStatus.OK,
+        description: 'swap params',
+        type: RebalanceSwapOutDto,
       }),
     );
   }

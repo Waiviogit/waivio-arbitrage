@@ -1,10 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { REBALANCING_PROVIDE } from '../../../domain/rebalancing/constants';
 import {
   ChangeNotificationSettingsInterface,
+  GetUserSwapParamsInterface,
   RebalancingInterface,
 } from '../../../domain/rebalancing/interface';
-import { UserRebalanceTableType } from '../../../domain/rebalancing/types';
+import {
+  UserRebalanceTableType,
+  UserSwapParamsType,
+} from '../../../domain/rebalancing/types';
 import { UserRebalancingDocumentType } from '../../../persistence/user-rebalancing/types';
 
 @Injectable()
@@ -22,5 +26,15 @@ export class RebalancingService {
     update,
   }: ChangeNotificationSettingsInterface): Promise<UserRebalancingDocumentType> {
     return this.rebalancing.changeNotificationSettings({ account, update });
+  }
+
+  async getUserSwapParams(
+    params: GetUserSwapParamsInterface,
+  ): Promise<UserSwapParamsType> {
+    const response = await this.rebalancing.getUserSwapParams(params);
+    if (response.error) {
+      throw new HttpException(response.error.message, response.error.status);
+    }
+    return response;
   }
 }

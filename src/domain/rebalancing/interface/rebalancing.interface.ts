@@ -2,7 +2,12 @@ import {
   EngineBalanceType,
   MarketPoolType,
 } from '../../../services/hive-engine-api/types';
-import { HoldingsType, OpenMarketType, UserRebalanceTableType } from '../types';
+import {
+  HoldingsType,
+  OpenMarketType,
+  UserRebalanceTableType,
+  UserSwapParamsType,
+} from '../types';
 import { UserRebalancingDocumentType } from '../../../persistence/user-rebalancing/types';
 import { UserRebalancing } from '../../../persistence/user-rebalancing/user-rebalancing.schema';
 
@@ -13,11 +18,22 @@ export interface RebalancingInterface {
     account,
     update,
   }: ChangeNotificationSettingsInterface): Promise<UserRebalancingDocumentType>;
+
+  getUserSwapParams({
+    account,
+    pair,
+    slippage,
+  }: GetUserSwapParamsInterface): Promise<UserSwapParamsType>;
 }
 
 export interface CalcHoldingsInterface {
   balances: EngineBalanceType[];
   initialValues: HoldingsType[];
+}
+
+export interface GetPairRatioBalanceInterface {
+  holding: HoldingsType;
+  balances: EngineBalanceType[];
 }
 
 export interface CalcOpenMarketInterface {
@@ -32,6 +48,11 @@ export interface GetDirectPoolMarketInterface {
 
 export interface CalcRatioInterface extends GetDirectPoolMarketInterface {
   key: string;
+}
+
+export interface GetPoolMarketInterface {
+  market: OpenMarketType;
+  pools: MarketPoolType[];
 }
 
 export interface GetIndirectPoolMarketInterface {
@@ -57,6 +78,13 @@ export interface GetRebalanceTableRowsInterface {
 export interface GetEarnRebalanceInterface {
   row: OpenMarketType;
   pools: MarketPoolType[];
+  slippage?: number;
+}
+
+export interface GetUserSwapParamsInterface {
+  account: string;
+  pair: string;
+  slippage?: number;
 }
 
 export interface GetRebalanceSwapOutputInterface {

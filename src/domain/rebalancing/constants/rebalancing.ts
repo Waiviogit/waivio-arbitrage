@@ -24,9 +24,6 @@ export const DB_REBALANCING_FIELD = Object.freeze({
   ETH_HBD: 'ETH_HBD',
 });
 
-export const ENGINE_TOKENS_FOR_PRECISION = [
-  ...Object.values(ENGINE_TOKENS_SUPPORTED),
-];
 
 export const REBALANCING_POOLS = [
   `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.WAIV}`,
