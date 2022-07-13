@@ -271,7 +271,7 @@ export class Rebalancing implements RebalancingInterface {
 
     const quantityToSwap = new BigNumber(row[`${toSwap}Quantity`])
       .times(percentToSwap)
-      .toFixed();
+      .toFixed(DEFAULT_PRECISION);
 
     const swapOutput = this.getRebalanceSwapOutput({
       row,
