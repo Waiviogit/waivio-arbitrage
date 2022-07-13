@@ -18,7 +18,7 @@ export interface GetSwapOutputInterface {
   pool: MarketPoolType;
   slippage: number;
   tradeFeeMul: number;
-  precision: string;
+  precision: number;
 }
 
 export interface GetAmountOutInterface {
@@ -33,4 +33,10 @@ export interface OperationForJsonInterface {
   minAmountOut: string;
   tokenSymbol: string;
   tokenAmount: string;
+}
+
+export interface GetUpdatedPoolStatsInterface {
+  pool: MarketPoolType;
+  baseAdjusted: BigNumber;
+  quoteAdjusted: BigNumber;
 }

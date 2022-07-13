@@ -1,7 +1,10 @@
+import { MarketPoolType } from './hive-engine-client.types';
+
 export type SwapOutputType = {
   json: SwapJsonType;
   minAmountOut: string;
   amountOut: string;
+  updatedPool: MarketPoolType;
 };
 
 export type SwapJsonType = {

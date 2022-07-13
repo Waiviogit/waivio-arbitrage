@@ -18,7 +18,7 @@ export type EngineProxyType = EngineQueryType & {
 };
 
 export type MarketPoolType = {
-  _id: string;
+  _id: number;
   tokenPair: string;
   baseQuantity: string;
   quoteQuantity: string;
@@ -27,7 +27,7 @@ export type MarketPoolType = {
   baseVolume: string;
   quoteVolume: string;
   totalShares: string;
-  precision: string;
+  precision: number;
   creator: string;
 };
 

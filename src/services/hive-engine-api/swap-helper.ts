@@ -3,10 +3,11 @@ import BigNumber from 'bignumber.js';
 import {
   GetAmountOutInterface,
   GetSwapOutputInterface,
+  GetUpdatedPoolStatsInterface,
   OperationForJsonInterface,
   SwapHelperInterface,
 } from './interface';
-import { SwapJsonType, SwapOutputType } from './types';
+import { MarketPoolType, SwapJsonType, SwapOutputType } from './types';
 
 @Injectable()
 export class SwapHelper implements SwapHelperInterface {
@@ -50,6 +51,17 @@ export class SwapHelper implements SwapHelperInterface {
       )
       .toFixed(Number(precision), BigNumber.ROUND_DOWN);
 
+    const tokenPairDelta =
+      symbol === baseSymbol
+        ? [new BigNumber(amountIn), new BigNumber(amountOut).negated()]
+        : [new BigNumber(amountOut).negated(), new BigNumber(amountIn)];
+
+    const updatedPool = this.getUpdatedPoolStats({
+      pool,
+      baseAdjusted: tokenPairDelta[0],
+      quoteAdjusted: tokenPairDelta[1],
+    });
+
     const json = this._operationForJson({
       minAmountOut,
       tokenPair,
@@ -61,7 +73,31 @@ export class SwapHelper implements SwapHelperInterface {
       minAmountOut,
       amountOut,
       json,
+      updatedPool,
     };
+  }
+
+  getUpdatedPoolStats({
+    pool,
+    baseAdjusted,
+    quoteAdjusted,
+  }: GetUpdatedPoolStatsInterface): MarketPoolType {
+    const uPool = pool;
+
+    uPool.baseQuantity = new BigNumber(pool.baseQuantity)
+      .plus(baseAdjusted)
+      .toFixed(pool.precision, BigNumber.ROUND_HALF_UP);
+    uPool.quoteQuantity = new BigNumber(pool.quoteQuantity)
+      .plus(quoteAdjusted)
+      .toFixed(pool.precision, BigNumber.ROUND_HALF_UP);
+
+    uPool.basePrice = new BigNumber(uPool.quoteQuantity)
+      .dividedBy(uPool.baseQuantity)
+      .toFixed(pool.precision, BigNumber.ROUND_DOWN);
+    uPool.quotePrice = new BigNumber(uPool.baseQuantity)
+      .dividedBy(uPool.quoteQuantity)
+      .toFixed(pool.precision, BigNumber.ROUND_DOWN);
+    return uPool;
   }
 
   private _getAmountOut({
