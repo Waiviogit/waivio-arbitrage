@@ -384,8 +384,6 @@ export class Rebalancing implements RebalancingInterface {
         newPercent,
         percentRatioDiff,
       });
-
-      console.log('11111111111111111111');
     } while (isRatioDiff);
 
     const earn = this.getDiffPercent(
