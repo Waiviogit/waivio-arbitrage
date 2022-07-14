@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OpenMarketType } from '../../../../domain/rebalancing/types';
+import {OpenMarketType, RebalanceTableRowType} from '../../../../domain/rebalancing/types';
 
 class RebalancePairDTO {
   @ApiProperty({ type: String })
@@ -56,5 +56,5 @@ export class RebalanceTableDto {
   differencePercent: number;
 
   @ApiProperty({ type: () => [RebalancePairDTO] })
-  table: OpenMarketType[];
+  table: RebalanceTableRowType[];
 }
