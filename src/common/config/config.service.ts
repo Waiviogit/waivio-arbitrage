@@ -24,10 +24,10 @@ class ConfigService {
     return this.getValue('PORT', true);
   }
 
-  getRedisConfig(): string {
+  getRedisConfig(db?: string): string {
     const host = this.getValue('REDIS_HOST');
     const port = this.getValue('REDIS_PORT');
-    const db = this.getValue('REDIS_DB');
+    if (!db) db = this.getValue('REDIS_DB');
 
     return `redis://${host}:${port}/${db}`;
   }

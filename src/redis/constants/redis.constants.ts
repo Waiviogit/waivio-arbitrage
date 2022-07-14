@@ -3,3 +3,7 @@ export const REDIS_KEY = {
 };
 
 export const DEFAULT_START_ENGINE_BLOCK = 16778803;
+
+export const DB = {
+  NOTIFICATION: '8',
+};

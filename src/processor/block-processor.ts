@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { REDIS_PROVIDERS } from '../redis/constants/provider';
-import { IBlockProcessor } from '../redis/interfaces/redis-client.interfaces';
+import { RedisBlockProcessorInterface } from '../redis/interfaces/redis-client.interfaces';
 import {
   DEFAULT_START_ENGINE_BLOCK,
   REDIS_KEY,
@@ -8,23 +8,22 @@ import {
 import { HiveEngineClientInterface } from '../services/hive-engine-api/interface';
 import { HIVE_ENGINE_PROVIDE } from '../services/hive-engine-api/constants';
 import { ENGINE_PARSER_PROVIDERS } from './engine-parser/constants/provider';
-import { IEngineParser } from './engine-parser/interfaces/engine-parser.interface';
+import { EngineParserInterface } from './engine-parser/interfaces/engine-parser.interface';
 
 @Injectable()
 export class BlockProcessor {
   private _currentBlock: number;
   private readonly _logger = new Logger(BlockProcessor.name);
-  // TODO какой тут ключ берется?
   private readonly _redisBlockKey: string = REDIS_KEY.LAST_BLOCK;
   private readonly _startDefaultBlock: number = DEFAULT_START_ENGINE_BLOCK;
 
   constructor(
-    @Inject(REDIS_PROVIDERS.MAIN)
-    private readonly _processorClient: IBlockProcessor,
+    @Inject(REDIS_PROVIDERS.BLOCK_PROCESSOR)
+    private readonly _redisProcessorClient: RedisBlockProcessorInterface,
     @Inject(HIVE_ENGINE_PROVIDE.CLIENT)
     private readonly _hiveEngineApiDomain: HiveEngineClientInterface,
     @Inject(ENGINE_PARSER_PROVIDERS.MAIN)
-    private readonly _engineParser: IEngineParser,
+    private readonly _engineParser: EngineParserInterface,
   ) {}
 
   async start(): Promise<void> {
@@ -42,7 +41,7 @@ export class BlockProcessor {
 
     this._logger.log(`${this._currentBlock}: ${end[1] / 1000000}ms`);
     if (processed) {
-      await this._processorClient.set(
+      await this._redisProcessorClient.set(
         this._redisBlockKey,
         `${this._currentBlock + 1}`,
       );
@@ -53,7 +52,6 @@ export class BlockProcessor {
   }
 
   private async _processBlock(blockNumber: number): Promise<boolean> {
-    console.log('blockNumber', blockNumber);
     const block = await this._hiveEngineApiDomain.getBlock(blockNumber);
     if (block && (!block.transactions || !block.transactions[0])) {
       this._logger.log(`EMPTY BLOCK: ${blockNumber}`);
@@ -70,7 +68,7 @@ export class BlockProcessor {
   }
 
   private async _getBlockNumber(): Promise<number> {
-    const blockNumber = await this._processorClient.get(this._redisBlockKey);
+    const blockNumber = await this._redisProcessorClient.get(this._redisBlockKey);
     if (blockNumber) return +blockNumber;
 
     return this._startDefaultBlock;

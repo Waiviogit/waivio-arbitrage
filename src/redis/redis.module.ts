@@ -1,9 +1,9 @@
-import { Global, Module } from "@nestjs/common";
-import { RedisProvider } from "./redis.provider";
+import { Global, Module } from '@nestjs/common';
+import { RedisBlockProcessorProvider, RedisNotificationProvider } from "./redisBlockProcessorProvider";
 
 @Global()
 @Module({
-  providers: [RedisProvider],
-  exports: [RedisProvider],
+  providers: [RedisBlockProcessorProvider, RedisNotificationProvider],
+  exports: [RedisBlockProcessorProvider, RedisNotificationProvider],
 })
 export class RedisClientModule {}

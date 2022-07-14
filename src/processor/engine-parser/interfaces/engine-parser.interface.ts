@@ -1,5 +1,5 @@
 import { EngineTransactionType } from '../../../services/hive-engine-api/types';
 
-export interface IEngineParser {
+export interface EngineParserInterface {
   parseEngineBlock(transactions: EngineTransactionType[]): void;
 }

@@ -6,6 +6,7 @@ import { DatabaseModule } from './database/database.module';
 import { PersistenceModule } from './persistence/persistence.module';
 import { RedisClientModule } from './redis/redis.module';
 import { BlockProcessorModule } from './processor/block-processor.module';
+import { NotificationSocketModule } from './services/notification-socket/notification-socket.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { BlockProcessorModule } from './processor/block-processor.module';
     DomainModule,
     RedisClientModule,
     BlockProcessorModule,
+    NotificationSocketModule
   ],
   controllers: [],
   providers: [],

@@ -1,3 +1,4 @@
 export const REDIS_PROVIDERS = Object.freeze({
-  MAIN: 'RedisClient',
+  BLOCK_PROCESSOR: 'RedisBlockProcessorClient',
+  NOTIFICATION: 'RedisNotificationClient',
 });

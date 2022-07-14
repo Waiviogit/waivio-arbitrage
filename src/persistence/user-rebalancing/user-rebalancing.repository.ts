@@ -40,7 +40,7 @@ export class UserRebalancingRepository
   }
 
   async find({
-    filter = {},
+    filter,
     projection,
     options,
   }: UserRebalancingFindInterface): Promise<UserRebalancingDocumentType[]> {

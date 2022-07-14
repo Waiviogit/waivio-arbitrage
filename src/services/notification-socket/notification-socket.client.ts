@@ -2,7 +2,6 @@ import * as WebSocket from 'ws';
 import { Injectable } from '@nestjs/common';
 import { configService } from '../../common/config';
 import { NOTIFICATION_URL } from './constants/notification-socket.constants';
-import { NotificationDataType } from './types/notification.types';
 
 @Injectable()
 export class NotificationSocketClient {
@@ -20,7 +19,7 @@ export class NotificationSocketClient {
     });
   }
 
-  async sendMessage(data: NotificationDataType[]): Promise<void> {
+  async sendMessage(message: string): Promise<void> {
     if (this._ws.readyState !== 1) {
       this._ws = new WebSocket(this._url, [], {
         headers: { API_KEY: configService.getApiKey() },
@@ -32,7 +31,6 @@ export class NotificationSocketClient {
       return;
     }
 
-    // TODO проверить чтоб объект соответствовал
-    this._ws.send(JSON.stringify({ payload: { id: 'arbitrage', data }, method: 'setNotification' }));
+    this._ws.send(message);
   }
 }
