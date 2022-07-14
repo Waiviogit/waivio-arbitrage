@@ -440,6 +440,7 @@ export class Rebalancing implements RebalancingInterface {
       row.earn = earn;
       row.rebalanceBase = rebalanceBase;
       row.rebalanceQuote = rebalanceQuote;
+      row.difference = new BigNumber(row.difference).abs().toFixed(2);
     }
 
     return openMarkets as RebalanceTableRowType[];
