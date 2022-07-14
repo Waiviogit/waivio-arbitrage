@@ -143,7 +143,7 @@ export class EngineParser implements EngineParserInterface {
       const differencePercent = new BigNumber(pool.difference).toFixed(2);
       dataForNotifications.push({
         account,
-        differencePercent,
+        differencePercent: differencePercent.replace('-', ''),
         tokenPair: pool.dbField,
       });
       await this._redisNotificationClient.zadd({
