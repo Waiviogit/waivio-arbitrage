@@ -147,7 +147,7 @@ export class EngineParser implements EngineParserInterface {
         tokenPair: pool.dbField,
       });
       await this._redisNotificationClient.zadd({
-        key: account,
+        key: `rebalancing:${account}`,
         score: moment.utc().unix(),
         value: `${pool.dbField}:${differencePercent}`,
       });
@@ -162,14 +162,14 @@ export class EngineParser implements EngineParserInterface {
   ): Promise<boolean> {
     /** clear sorted set from members older than a day */
     await this._redisNotificationClient.zremrangebyscore({
-      key: account,
+      key: `rebalancing:${account}`,
       min: 1,
       max: moment.utc().subtract(1, 'day').unix(),
     });
     /** checking if notification was sent to this account within 10 minutes */
     const recentNotifications =
       await this._redisNotificationClient.zrangebyscore({
-        key: account,
+        key: `rebalancing:${account}`,
         min: moment.utc().subtract(10, 'minutes').unix(),
         max: moment.utc().unix(),
       });
@@ -178,7 +178,7 @@ export class EngineParser implements EngineParserInterface {
     /** getting notifications older than 10 minutes */
     const accountNotifications =
       await this._redisNotificationClient.zrangebyscore({
-        key: account,
+        key: `rebalancing:${account}`,
         min: 1,
         max: moment.utc().subtract(11, 'minutes').unix(),
       });
