@@ -370,7 +370,7 @@ export class Rebalancing implements RebalancingInterface {
         updatedPoolRatio,
       );
 
-      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.1);
+      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.2);
 
       const newPercent = new BigNumber(quantityToSwap)
         .times(percentRatioDiff)
