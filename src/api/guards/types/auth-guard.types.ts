@@ -1,6 +1,7 @@
 export type ValidateRequestType = {
   headers: HeadersRequestType;
   body: BodyRequest;
+  path: string;
 };
 
 type HeadersRequestType = {
