@@ -42,6 +42,7 @@ export type EarnRebalanceType = {
   json?: SwapJsonType | SwapJsonType[];
   from?: FromToRebalanceType;
   to?: FromToRebalanceType;
+  priceImpact?: string;
 };
 
 export type FromToRebalanceType = {
@@ -61,12 +62,14 @@ export type SwapRebalanceOutputType = {
   amountOut: string;
   updatedPool: MarketPoolType;
   updatedPoolRatio: string;
+  priceImpact: string;
 };
 
 export type UserSwapParamsType = {
   json?: string;
   from?: FromToRebalanceType;
   to?: FromToRebalanceType;
+  priceImpact?: string;
   error?: ErrorType;
 };
 

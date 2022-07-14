@@ -224,10 +224,16 @@ export class Rebalancing implements RebalancingInterface {
       )
         .div(swapOutput.updatedPool.baseQuantity)
         .toFixed();
+      const priceImpact = new BigNumber(
+        this.getDiffPercent(pool.basePrice, swapOutput.updatedPool.basePrice),
+      )
+        .abs()
+        .toFixed(2);
 
       return {
         ...swapOutput,
         updatedPoolRatio,
+        priceImpact,
       };
     }
     const firstPoolKey = toSwap === 'base' ? 'basePool' : 'quotePool';
@@ -242,6 +248,10 @@ export class Rebalancing implements RebalancingInterface {
       tradeFeeMul: DEFAULT_TRADE_FEE_MUL,
       pool: firstPool,
     });
+
+    const firstImpact = new BigNumber(
+      this.getDiffPercent(firstPool.basePrice, firstSwap.updatedPool.basePrice),
+    ).abs();
 
     const secondSwap = this.swapHelper.getSwapOutput({
       symbol: ENGINE_TOKENS_SUPPORTED.SWAP_HIVE,
@@ -263,10 +273,18 @@ export class Rebalancing implements RebalancingInterface {
       market: row,
     });
 
+    const secondImpact = new BigNumber(
+      this.getDiffPercent(
+        secondPool.basePrice,
+        secondSwap.updatedPool.basePrice,
+      ),
+    ).abs();
+
     return {
       ...secondSwap,
       json,
       updatedPoolRatio: marketRatio,
+      priceImpact: BigNumber.maximum(firstImpact, secondImpact).toFixed(2),
     };
   }
 
@@ -391,7 +409,7 @@ export class Rebalancing implements RebalancingInterface {
 
     const to = {
       symbol: row[toSwap === 'base' ? 'quote' : 'base'],
-      quantity: swapOutput.amountOut,
+      quantity: swapOutput.minAmountOut,
     };
 
     return {
@@ -401,6 +419,7 @@ export class Rebalancing implements RebalancingInterface {
       json: swapOutput.json,
       from,
       to,
+      priceImpact: swapOutput.priceImpact,
     };
   }
 
@@ -493,6 +512,7 @@ export class Rebalancing implements RebalancingInterface {
       from: earnRebalance.from,
       to: earnRebalance.to,
       json: JSON.stringify(earnRebalance.json),
+      priceImpact: earnRebalance.priceImpact,
     };
   }
 

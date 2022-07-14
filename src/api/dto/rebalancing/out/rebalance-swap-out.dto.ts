@@ -18,4 +18,7 @@ export class RebalanceSwapOutDto {
 
   @ApiProperty({ type: () => FromToRebalanceDTO })
   to?: FromToRebalanceType;
+
+  @ApiProperty({ type: String })
+  priceImpact?: string;
 }
