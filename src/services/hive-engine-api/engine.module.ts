@@ -7,7 +7,13 @@ import {
 
 @Global()
 @Module({
-  providers: [HiveEngineClientProvider, HiveEngineSwapHelperProvider],
-  exports: [HiveEngineClientProvider, HiveEngineSwapHelperProvider],
+  providers: [
+    HiveEngineClientProvider,
+    HiveEngineSwapHelperProvider,
+  ],
+  exports: [
+    HiveEngineClientProvider,
+    HiveEngineSwapHelperProvider,
+  ],
 })
 export class EngineModule {}
