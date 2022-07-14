@@ -326,6 +326,10 @@ export class Rebalancing implements RebalancingInterface {
       };
     }
 
+    if (row.quote === 'SWAP.ETH') {
+      console.log();
+    }
+
     const toSwap = new BigNumber(row.difference).lt(0) ? 'quote' : 'base';
 
     const percentToSwap = new BigNumber(row.difference)
@@ -339,6 +343,7 @@ export class Rebalancing implements RebalancingInterface {
       .toFixed(DEFAULT_PRECISION);
 
     let isRatioDiff, swapOutput, newBaseQuantity, newQuoteQuantity;
+    let previousDiff = '0';
     do {
       swapOutput = this.getRebalanceSwapOutput({
         row,
@@ -369,8 +374,10 @@ export class Rebalancing implements RebalancingInterface {
         walletRatio,
         updatedPoolRatio,
       );
+      if (new BigNumber(percentRatioDiff).eq(previousDiff)) break;
+      previousDiff = percentRatioDiff;
 
-      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.2);
+      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.1);
 
       const newPercent = new BigNumber(quantityToSwap)
         .times(percentRatioDiff)
