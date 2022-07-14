@@ -82,7 +82,7 @@ export class SwapHelper implements SwapHelperInterface {
     baseAdjusted,
     quoteAdjusted,
   }: GetUpdatedPoolStatsInterface): MarketPoolType {
-    const uPool = pool;
+    const uPool = { ...pool };
 
     uPool.baseQuantity = new BigNumber(pool.baseQuantity)
       .plus(baseAdjusted)

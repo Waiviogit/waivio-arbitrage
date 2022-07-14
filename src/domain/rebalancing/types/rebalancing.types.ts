@@ -1,4 +1,7 @@
-import { SwapJsonType } from '../../../services/hive-engine-api/types';
+import {
+  MarketPoolType,
+  SwapJsonType,
+} from '../../../services/hive-engine-api/types';
 
 export type HoldingsType = {
   base: string;
@@ -56,6 +59,8 @@ export type SwapRebalanceOutputType = {
   json: SwapJsonType | SwapJsonType[];
   minAmountOut: string;
   amountOut: string;
+  updatedPool: MarketPoolType;
+  updatedPoolRatio: string;
 };
 
 export type UserSwapParamsType = {

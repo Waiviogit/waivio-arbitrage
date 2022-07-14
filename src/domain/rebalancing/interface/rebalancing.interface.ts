@@ -94,3 +94,10 @@ export interface GetRebalanceSwapOutputInterface {
   quantityToSwap: string;
   slippage?: number;
 }
+
+export interface GetNewQuantityToSwapInterface {
+  toSwap: 'base' | 'quote';
+  quantityToSwap: string;
+  newPercent: string;
+  percentRatioDiff: string;
+}
