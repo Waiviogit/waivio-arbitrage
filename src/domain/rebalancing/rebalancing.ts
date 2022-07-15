@@ -441,6 +441,12 @@ export class Rebalancing implements RebalancingInterface {
       row.rebalanceBase = rebalanceBase;
       row.rebalanceQuote = rebalanceQuote;
       row.difference = new BigNumber(row.difference).abs().toFixed(2);
+      row.holdingsRatio = new BigNumber(row.holdingsRatio).toFixed(
+        DEFAULT_PRECISION,
+      );
+      row.marketRatio = new BigNumber(row.marketRatio).toFixed(
+        DEFAULT_PRECISION,
+      );
     }
 
     return openMarkets as RebalanceTableRowType[];
