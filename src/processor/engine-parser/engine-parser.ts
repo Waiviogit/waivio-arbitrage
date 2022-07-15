@@ -173,7 +173,11 @@ export class EngineParser implements EngineParserInterface {
         min: moment.utc().subtract(10, 'minutes').unix(),
         max: moment.utc().unix(),
       });
-    if (recentNotifications.length) return true;
+    if (recentNotifications.length) {
+      const samePair = recentNotifications.find((el) =>
+        el.includes(pool.dbField));
+      if (samePair) return true;
+    }
 
     /** getting notifications older than 10 minutes */
     const accountNotifications =
