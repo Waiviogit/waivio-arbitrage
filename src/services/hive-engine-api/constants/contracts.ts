@@ -36,6 +36,7 @@ export const ENGINE_CONTRACT = Object.freeze({
     TABLE: {
       POOLS: 'pools',
     },
+    ACTION: 'swapTokens',
   },
   COMMENTS: {
     NAME: 'comments',
