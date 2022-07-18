@@ -478,7 +478,6 @@ export class Rebalancing implements RebalancingInterface {
   async getUserSwapParams({
     account,
     pair,
-    slippage,
   }: GetUserSwapParamsInterface): Promise<UserSwapParamsType> {
     const initialValues = [
       ...REBALANCE_PAIRS_WAIV,
@@ -507,7 +506,6 @@ export class Rebalancing implements RebalancingInterface {
     const earnRebalance = this.getEarnRebalance({
       row: rebalancePair,
       pools,
-      slippage,
     });
     if (!earnRebalance.json) {
       return { error: { status: 422, message: 'Marketpools error' } };

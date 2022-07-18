@@ -22,7 +22,6 @@ export interface RebalancingInterface {
   getUserSwapParams({
     account,
     pair,
-    slippage,
   }: GetUserSwapParamsInterface): Promise<UserSwapParamsType>;
 }
 
@@ -84,7 +83,6 @@ export interface GetEarnRebalanceInterface {
 export interface GetUserSwapParamsInterface {
   account: string;
   pair: string;
-  slippage?: number;
 }
 
 export interface GetRebalanceSwapOutputInterface {
