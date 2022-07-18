@@ -184,7 +184,7 @@ export class EngineParser implements EngineParserInterface {
       await this._redisNotificationClient.zrangebyscore({
         key: `rebalancing:${account}`,
         min: 1,
-        max: moment.utc().subtract(11, 'minutes').unix(),
+        max: moment.utc().subtract(10, 'minutes').unix(),
       });
     if (!accountNotifications.length) return false;
 
