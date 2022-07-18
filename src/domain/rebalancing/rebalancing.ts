@@ -326,24 +326,15 @@ export class Rebalancing implements RebalancingInterface {
       };
     }
 
-    if (row.quote === 'SWAP.ETH') {
-      console.log();
-    }
-
     const toSwap = new BigNumber(row.difference).lt(0) ? 'quote' : 'base';
 
-    const percentToSwap = new BigNumber(row.difference)
-      .div(2)
-      .div(row.difference)
-      .abs()
-      .toFixed();
-
     let quantityToSwap = new BigNumber(row[`${toSwap}Quantity`])
-      .times(percentToSwap)
+      .div(2)
       .toFixed(DEFAULT_PRECISION);
 
     let isRatioDiff, swapOutput, newBaseQuantity, newQuoteQuantity;
     let previousDiff = '0';
+
     do {
       swapOutput = this.getRebalanceSwapOutput({
         row,
@@ -379,11 +370,7 @@ export class Rebalancing implements RebalancingInterface {
 
       isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.1);
 
-      const newPercent = new BigNumber(quantityToSwap)
-        .times(percentRatioDiff)
-        .div(200)
-        .abs()
-        .toFixed();
+      const newPercent = new BigNumber(quantityToSwap).div(2).abs().toFixed();
 
       quantityToSwap = this.getNewQuantityToSwap({
         toSwap,
@@ -392,10 +379,9 @@ export class Rebalancing implements RebalancingInterface {
         percentRatioDiff,
       });
     } while (isRatioDiff);
-
     const earn = this.getDiffPercent(
-      new BigNumber(row.baseQuantity).times(row.quoteQuantity).toFixed(),
-      new BigNumber(newBaseQuantity).times(newQuoteQuantity).toFixed(),
+      new BigNumber(row.baseQuantity).times(row.quoteQuantity).sqrt().toFixed(),
+      new BigNumber(newBaseQuantity).times(newQuoteQuantity).sqrt().toFixed(),
     );
     const rebalanceBase =
       toSwap === 'quote'
