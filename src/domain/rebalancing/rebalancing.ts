@@ -333,8 +333,8 @@ export class Rebalancing implements RebalancingInterface {
       .toFixed(DEFAULT_PRECISION);
 
     let isRatioDiff, swapOutput, newBaseQuantity, newQuoteQuantity;
-    let previousDiff;
-
+    let previousDiff = '1000000000';
+    let percentRatioDiff;
     do {
       swapOutput = this.getRebalanceSwapOutput({
         row,
@@ -361,21 +361,19 @@ export class Rebalancing implements RebalancingInterface {
         .toFixed();
       const updatedPoolRatio = swapOutput.updatedPoolRatio;
 
-      const percentRatioDiff = this.getDiffPercent(
-        walletRatio,
-        updatedPoolRatio,
-      );
+      percentRatioDiff = this.getDiffPercent(walletRatio, updatedPoolRatio);
 
-      if (
-        previousDiff &&
-        new BigNumber(percentRatioDiff)
-          .abs()
-          .gte(new BigNumber(previousDiff).abs())
-      ) {
+      if (new BigNumber(percentRatioDiff).eq(previousDiff)) {
         break;
       }
 
-      previousDiff = percentRatioDiff;
+      if (
+        new BigNumber(percentRatioDiff)
+          .abs()
+          .lt(new BigNumber(previousDiff).abs())
+      ) {
+        previousDiff = percentRatioDiff;
+      }
 
       isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.1);
 
