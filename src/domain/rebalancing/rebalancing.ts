@@ -378,7 +378,7 @@ export class Rebalancing implements RebalancingInterface {
       isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.1);
 
       const newPercent = new BigNumber(quantityToSwap).div(2).abs().toFixed();
-
+      if (!isRatioDiff) break;
       quantityToSwap = this.getNewQuantityToSwap({
         toSwap,
         quantityToSwap,
@@ -390,6 +390,7 @@ export class Rebalancing implements RebalancingInterface {
       new BigNumber(row.baseQuantity).times(row.quoteQuantity).sqrt().toFixed(),
       new BigNumber(newBaseQuantity).times(newQuoteQuantity).sqrt().toFixed(),
     );
+
     const rebalanceBase =
       toSwap === 'quote'
         ? `+ ${swapOutput.amountOut} ${row.base}`
@@ -468,7 +469,7 @@ export class Rebalancing implements RebalancingInterface {
     });
 
     const tableRows = this.getRebalanceTableRows({ openMarkets, pools });
-    console.log()
+
     return {
       differencePercent: user.differencePercent,
       table: tableRows,
