@@ -203,10 +203,10 @@ export class EngineParser implements EngineParserInterface {
     notifications: string[],
     pool: OpenMarketType,
   ): boolean {
-    const savedNotifications = notifications.filter((el) => el.includes(pool.dbField));
-    if (!savedNotifications.length) return true;
+    const notification = notifications.find((el) => el.includes(pool.dbField));
+    if (!notification) return true;
 
-    const differencePercent = savedNotifications[savedNotifications.length - 1].split(':')[1];
+    const differencePercent = notification.split(':')[1];
     const stepChange = new BigNumber(pool.difference)
       .dividedBy(differencePercent)
       .minus(1);
