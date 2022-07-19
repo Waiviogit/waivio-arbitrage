@@ -1,9 +1,10 @@
 export const NOTIFICATION_URL = '/notifications-api';
 
 export const METHODS = Object.freeze({
-  setNotification: 'setNotification',
+  SET_NOTIFICATION: 'setNotification',
+  UPDATE_INFO: 'updateInfo',
 });
 
 export const NOTIFICATION_TYPES = Object.freeze({
-  arbitrage: 'arbitrage',
+  ARBITRAGE: 'arbitrage',
 });

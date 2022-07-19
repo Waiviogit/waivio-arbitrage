@@ -40,10 +40,12 @@ export class EngineParser implements EngineParserInterface {
   async parseEngineBlock(transactions: EngineTransactionType[]): Promise<void> {
     const marketPool = transactions.filter(
       (transaction) =>
-        transaction.contract === ENGINE_CONTRACT.MARKETPOOLS.NAME,
+        transaction.contract === ENGINE_CONTRACT.MARKETPOOLS.NAME &&
+        ENGINE_CONTRACT.MARKETPOOLS.ACTION
     );
     if (!marketPool.length) return;
 
+    await this._sendMessageToUpdateTableInfo();
     const poolTokens = this._handleSwapEvents(marketPool);
     if (!poolTokens.size) return;
 
@@ -52,9 +54,9 @@ export class EngineParser implements EngineParserInterface {
     const dataForNotifications = await this._checkUsersDifferences(users);
     if (dataForNotifications.length) {
       const message = JSON.stringify({
-        method: METHODS.setNotification,
+        method: METHODS.SET_NOTIFICATION,
         payload: {
-          id: NOTIFICATION_TYPES.arbitrage,
+          id: NOTIFICATION_TYPES.ARBITRAGE,
           data: dataForNotifications,
         },
       });
@@ -211,5 +213,10 @@ export class EngineParser implements EngineParserInterface {
     if (stepChange.gte(0.2)) return true;
 
     return false;
+  }
+
+  private async _sendMessageToUpdateTableInfo(): Promise<void> {
+    const messageForUpdates = JSON.stringify({ method: METHODS.UPDATE_INFO });
+    await this._notificationSocketClient.sendMessage(messageForUpdates);
   }
 }
