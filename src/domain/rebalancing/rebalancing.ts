@@ -77,8 +77,8 @@ export class Rebalancing implements RebalancingInterface {
     const quoteBalance = balances.find((b) => b.symbol === holding.quote);
     if (!baseBalance || !quoteBalance) {
       return {
-        baseQuantity: '0',
-        quoteQuantity: '0',
+        baseQuantity: !baseBalance ? '0' : baseBalance.balance,
+        quoteQuantity: !quoteBalance ? '0' : quoteBalance.balance,
         holdingsRatio: '0',
       };
     }
@@ -468,7 +468,7 @@ export class Rebalancing implements RebalancingInterface {
     });
 
     const tableRows = this.getRebalanceTableRows({ openMarkets, pools });
-
+    console.log()
     return {
       differencePercent: user.differencePercent,
       table: tableRows,
