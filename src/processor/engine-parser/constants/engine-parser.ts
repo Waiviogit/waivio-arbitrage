@@ -1,0 +1,1 @@
+export const SEND_UPDATE_MAX_TIME_MS = 2000;

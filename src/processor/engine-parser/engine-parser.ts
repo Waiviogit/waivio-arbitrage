@@ -24,9 +24,11 @@ import {
   NOTIFICATION_TYPES,
 } from '../../services/notification-socket/constants/notification-socket.constants';
 import * as moment from 'moment';
+import { SEND_UPDATE_MAX_TIME_MS } from './constants';
 
 @Injectable()
 export class EngineParser implements EngineParserInterface {
+  private previousSendDate;
   constructor(
     @Inject(REBALANCING_PROVIDE.MAIN)
     private readonly _rebalancingDomain: RebalancingInterface,
@@ -35,13 +37,15 @@ export class EngineParser implements EngineParserInterface {
     private readonly _notificationSocketClient: NotificationSocketClient,
     @Inject(REDIS_PROVIDERS.NOTIFICATION)
     private readonly _redisNotificationClient: RedisNotificationsInterface,
-  ) {}
+  ) {
+    this.previousSendDate = new Date().valueOf();
+  }
 
   async parseEngineBlock(transactions: EngineTransactionType[]): Promise<void> {
     const marketPool = transactions.filter(
       (transaction) =>
         transaction.contract === ENGINE_CONTRACT.MARKETPOOLS.NAME &&
-        ENGINE_CONTRACT.MARKETPOOLS.ACTION
+        ENGINE_CONTRACT.MARKETPOOLS.ACTION,
     );
     if (!marketPool.length) return;
 
@@ -177,7 +181,8 @@ export class EngineParser implements EngineParserInterface {
       });
     if (recentNotifications.length) {
       const samePair = recentNotifications.find((el) =>
-        el.includes(pool.dbField));
+        el.includes(pool.dbField),
+      );
       if (samePair) return true;
     }
 
@@ -203,10 +208,13 @@ export class EngineParser implements EngineParserInterface {
     notifications: string[],
     pool: OpenMarketType,
   ): boolean {
-    const savedNotifications = notifications.filter((el) => el.includes(pool.dbField));
+    const savedNotifications = notifications.filter((el) =>
+      el.includes(pool.dbField),
+    );
     if (!savedNotifications.length) return true;
 
-    const differencePercent = savedNotifications[savedNotifications.length - 1].split(':')[1];
+    const differencePercent =
+      savedNotifications[savedNotifications.length - 1].split(':')[1];
     const stepChange = new BigNumber(pool.difference)
       .dividedBy(differencePercent)
       .minus(1);
@@ -216,7 +224,11 @@ export class EngineParser implements EngineParserInterface {
   }
 
   private async _sendMessageToUpdateTableInfo(): Promise<void> {
+    const now = new Date().valueOf();
+    const diff = now - this.previousSendDate;
+    if (diff < SEND_UPDATE_MAX_TIME_MS) return;
     const messageForUpdates = JSON.stringify({ method: METHODS.UPDATE_INFO });
     await this._notificationSocketClient.sendMessage(messageForUpdates);
+    this.previousSendDate = new Date().valueOf();
   }
 }
