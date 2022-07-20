@@ -381,11 +381,15 @@ export class Rebalancing implements RebalancingInterface {
 
       isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.1);
 
-      const newPercent = new BigNumber(quantityToSwap)
+      let newPercent = new BigNumber(quantityToSwap)
         .times(percentRatioDiff)
         .div(200)
         .abs()
         .toFixed();
+
+      if (new BigNumber(percentRatioDiff).gt(100)) {
+        newPercent = new BigNumber(quantityToSwap).div(2).abs().toFixed();
+      }
       // const newPercent = new BigNumber(quantityToSwap).div(2).abs().toFixed();
       if (!isRatioDiff) break;
       quantityToSwap = this.getNewQuantityToSwap({
