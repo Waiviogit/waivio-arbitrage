@@ -45,7 +45,7 @@ export class EngineParser implements EngineParserInterface {
     );
     if (!marketPool.length) return;
 
-    //await this._sendMessageToUpdateTableInfo();
+    await this._sendMessageToUpdateTableInfo();
     const poolTokens = this._handleSwapEvents(marketPool);
     if (!poolTokens.size) return;
 
