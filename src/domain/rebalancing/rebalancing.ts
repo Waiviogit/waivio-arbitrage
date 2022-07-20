@@ -383,7 +383,7 @@ export class Rebalancing implements RebalancingInterface {
 
       const newPercent = new BigNumber(quantityToSwap)
         .times(percentRatioDiff)
-        .div(100)
+        .div(200)
         .abs()
         .toFixed();
       // const newPercent = new BigNumber(quantityToSwap).div(2).abs().toFixed();
