@@ -431,7 +431,7 @@ export class Rebalancing implements RebalancingInterface {
         row,
         pools,
       });
-      row.earn = earn;
+      row.earn = new BigNumber(earn).toFixed(2, BigNumber.ROUND_UP);
       row.rebalanceBase = rebalanceBase;
       row.rebalanceQuote = rebalanceQuote;
       row.difference = new BigNumber(row.difference).abs().toFixed(2);
