@@ -1,6 +1,6 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ProfitDto } from '../../dto/profit';
+import { ProfitDto, ProfitReportDto } from '../../dto/profit';
 
 export class ProfitControllerDoc {
   static main(): ClassDecorator {
@@ -59,6 +59,20 @@ export class ProfitControllerDoc {
         status: HttpStatus.OK,
         description: 'token holdings',
         type: ProfitDto,
+      }),
+    );
+  }
+
+  static getReport(): MethodDecorator {
+    return applyDecorators(
+      ApiOperation({
+        summary: 'endpoint profit table',
+        description: 'endpoint profit table',
+      }),
+      ApiResponse({
+        status: HttpStatus.OK,
+        description: 'profit table',
+        type: ProfitReportDto,
       }),
     );
   }

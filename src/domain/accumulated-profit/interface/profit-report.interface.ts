@@ -1,4 +1,5 @@
 import { InitialHoldingsDocumentType } from '../../../persistence/initial-holdings/types';
+import { ProfitReportType } from '../types';
 
 export interface ProfitReportInterface {
   addTokenToReport({
@@ -17,6 +18,8 @@ export interface ProfitReportInterface {
     account,
     symbol,
   }: DeleteTokenFromReportInterface): Promise<InitialHoldingsDocumentType>;
+
+  getProfitReport(account: string): Promise<ProfitReportType>;
 }
 
 export interface EditReportInterface {

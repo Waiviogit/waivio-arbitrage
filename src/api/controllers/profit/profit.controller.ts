@@ -11,6 +11,7 @@ import {
   DeleteReportTokenDto,
   EditReportTokenDto,
   ProfitDto,
+  ProfitReportDto,
 } from '../../dto/profit';
 import { ProfitService } from './profit.service';
 import { ProfitControllerDoc } from './profit.controller.doc';
@@ -57,5 +58,8 @@ export class ProfitController {
   }
 
   @Get('report/:account')
-  async getReport(@Param('account') account: string): Promise<void> {}
+  @ProfitControllerDoc.getReport()
+  async getReport(@Param('account') account: string): Promise<ProfitReportDto> {
+    return this.profitService.getProfitReport(account);
+  }
 }
