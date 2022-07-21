@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema()
+@Schema({ versionKey: false })
 export class InitialHoldings {
   @Prop({ type: String, required: true })
   account: string;
