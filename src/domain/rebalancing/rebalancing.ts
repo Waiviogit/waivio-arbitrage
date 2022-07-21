@@ -24,6 +24,7 @@ import {
 import {
   DEFAULT_PRECISION,
   DEFAULT_SLIPPAGE,
+  DEFAULT_SLIPPAGE_MAX,
   DEFAULT_TRADE_FEE_MUL,
   ENGINE_TOKENS_SUPPORTED,
   REBALANCE_PAIRS_BTC,
@@ -256,7 +257,7 @@ export class Rebalancing implements RebalancingInterface {
     const secondSwap = this.swapHelper.getSwapOutput({
       symbol: ENGINE_TOKENS_SUPPORTED.SWAP_HIVE,
       amountIn: firstSwap.minAmountOut,
-      slippage,
+      slippage: DEFAULT_SLIPPAGE_MAX,
       precision: DEFAULT_PRECISION,
       tradeFeeMul: DEFAULT_TRADE_FEE_MUL,
       pool: secondPool,
@@ -421,7 +422,7 @@ export class Rebalancing implements RebalancingInterface {
 
     const to = {
       symbol: row[toSwap === 'base' ? 'quote' : 'base'],
-      quantity: swapOutput.minAmountOut,
+      quantity: swapOutput.amountOut,
     };
 
     return {
@@ -435,6 +436,14 @@ export class Rebalancing implements RebalancingInterface {
     };
   }
 
+  formatEarn(earn: string): string {
+    if (new BigNumber(earn).abs().eq(0)) return earn;
+    if (new BigNumber(earn).abs().gte(0.1)) {
+      return new BigNumber(earn).toFixed(2, BigNumber.ROUND_UP);
+    }
+    return earn.match(/-?0\.0+../g)[0];
+  }
+
   getRebalanceTableRows({
     openMarkets,
     pools,
@@ -444,7 +453,7 @@ export class Rebalancing implements RebalancingInterface {
         row,
         pools,
       });
-      row.earn = new BigNumber(earn).toFixed(2, BigNumber.ROUND_UP);
+      row.earn = this.formatEarn(earn);
       row.rebalanceBase = rebalanceBase;
       row.rebalanceQuote = rebalanceQuote;
       row.difference = new BigNumber(row.difference).abs().toFixed(2);
