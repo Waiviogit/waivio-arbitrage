@@ -34,7 +34,10 @@ import {
   REBALANCING_POOLS,
 } from './constants';
 import * as _ from 'lodash';
-import { EngineBalanceType } from '../../services/hive-engine-api/types';
+import {
+  BalancesBeforeSwapType,
+  EngineBalanceType,
+} from '../../services/hive-engine-api/types';
 import {
   EarnRebalanceType,
   HoldingsType,
@@ -220,6 +223,7 @@ export class Rebalancing implements RebalancingInterface {
         tradeFeeMul: DEFAULT_TRADE_FEE_MUL,
         pool,
       });
+      swapOutput.json.contractPayload.balances = this.addBalancesInfoIntoPayload(row);
       const updatedPoolRatio = new BigNumber(
         swapOutput.updatedPool.quoteQuantity,
       )
@@ -249,6 +253,7 @@ export class Rebalancing implements RebalancingInterface {
       tradeFeeMul: DEFAULT_TRADE_FEE_MUL,
       pool: firstPool,
     });
+    firstSwap.json.contractPayload.balances = this.addBalancesInfoIntoPayload(row);
 
     const firstImpact = new BigNumber(
       this.getDiffPercent(firstPool.basePrice, firstSwap.updatedPool.basePrice),
@@ -550,5 +555,15 @@ export class Rebalancing implements RebalancingInterface {
       filter: { account },
       update,
     });
+  }
+
+  addBalancesInfoIntoPayload(pool: OpenMarketType): BalancesBeforeSwapType {
+    return {
+      dbField: pool.dbField,
+      baseSymbol: pool.base,
+      quoteSymbol: pool.quote,
+      baseQuantity: pool.baseQuantity,
+      quoteQuantity: pool.quoteQuantity
+    };
   }
 }
