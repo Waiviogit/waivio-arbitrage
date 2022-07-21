@@ -22,8 +22,8 @@ export type SwapJsonType = {
 
 export type BalancesBeforeSwapType = {
   dbField: string;
-  baseSymbol: string;
-  quoteSymbol: string;
-  baseQuantity: string;
-  quoteQuantity: string;
+  symbolIn: string;
+  symbolOut: string;
+  symbolInQuantity: string;
+  symbolOutQuantity: string;
 };

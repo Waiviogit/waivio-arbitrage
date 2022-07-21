@@ -560,10 +560,10 @@ export class Rebalancing implements RebalancingInterface {
   addBalancesInfoIntoPayload(pool: OpenMarketType): BalancesBeforeSwapType {
     return {
       dbField: pool.dbField,
-      baseSymbol: pool.base,
-      quoteSymbol: pool.quote,
-      baseQuantity: pool.baseQuantity,
-      quoteQuantity: pool.quoteQuantity
+      symbolIn: pool.base,
+      symbolOut: pool.quote,
+      symbolInQuantity: pool.baseQuantity,
+      symbolOutQuantity: pool.quoteQuantity
     };
   }
 }
