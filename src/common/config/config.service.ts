@@ -13,10 +13,10 @@ class ConfigService {
     return value;
   }
 
-  public getMongoWaivioConnectionString(): string {
+  public getMongoArbitrageConnectionString(): string {
     const host = this.getValue('MONGO_HOST');
     const port = this.getValue('MONGO_PORT');
-    const db = this.getValue('WAIVIO_DB');
+    const db = this.getValue('ARBITRAGE_DB');
     return `mongodb://${host}:${port}/${db}`;
   }
 

@@ -1,7 +1,8 @@
 export const CONNECTION_MONGO = Object.freeze({
-  WAIVIO: 'WAIVIO',
+  ARBITRAGE: 'ARBITRAGE',
 });
 
 export const COLLECTION = Object.freeze({
   REBALANCING: 'rebalancing',
+  INITIAL_HOLDINGS: 'initial_holdings',
 });
