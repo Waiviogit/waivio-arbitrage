@@ -14,6 +14,7 @@ import { InitialHoldingsDocumentType } from '../../persistence/initial-holdings/
 import { ProfitReportRowType, ProfitReportType } from './types';
 import * as _ from 'lodash';
 import BigNumber from 'bignumber.js';
+import { formatTwoNumbersAfterZero } from '../../common/helpers';
 
 @Injectable()
 export class ProfitReport implements ProfitReportInterface {
@@ -82,7 +83,8 @@ export class ProfitReport implements ProfitReportInterface {
     const s2 = new BigNumber(Math.pow(after.toNumber(), 1 / table.length));
     const s1 = new BigNumber(Math.pow(before.toNumber(), 1 / table.length));
     // return s2.minus(s1).div(s1).times(100).toFixed();
-    return s2.div(s1).minus(1).times(100).toFixed();
+
+    return formatTwoNumbersAfterZero(s2.div(s1).minus(1).times(100).toFixed());
   }
 
   async getProfitReport(account: string): Promise<ProfitReportType> {

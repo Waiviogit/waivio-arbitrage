@@ -50,6 +50,7 @@ import BigNumber from 'bignumber.js';
 import { USER_REBALANCING_PROVIDE } from '../../persistence/user-rebalancing/constants';
 import { UserRebalancingRepositoryInterface } from '../../persistence/user-rebalancing/interface';
 import { UserRebalancingDocumentType } from '../../persistence/user-rebalancing/types';
+import { formatTwoNumbersAfterZero } from '../../common/helpers';
 
 @Injectable()
 export class Rebalancing implements RebalancingInterface {
@@ -436,14 +437,6 @@ export class Rebalancing implements RebalancingInterface {
     };
   }
 
-  formatEarn(earn: string): string {
-    if (new BigNumber(earn).abs().eq(0)) return earn;
-    if (new BigNumber(earn).abs().gte(0.1)) {
-      return new BigNumber(earn).toFixed(2, BigNumber.ROUND_UP);
-    }
-    return earn.match(/-?0\.0+../g)[0];
-  }
-
   getRebalanceTableRows({
     openMarkets,
     pools,
@@ -453,7 +446,7 @@ export class Rebalancing implements RebalancingInterface {
         row,
         pools,
       });
-      row.earn = this.formatEarn(earn);
+      row.earn = formatTwoNumbersAfterZero(earn);
       row.rebalanceBase = rebalanceBase;
       row.rebalanceQuote = rebalanceQuote;
       row.difference = new BigNumber(row.difference).abs().toFixed(2);
