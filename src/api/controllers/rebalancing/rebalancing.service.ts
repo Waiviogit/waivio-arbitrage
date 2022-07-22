@@ -2,6 +2,7 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { REBALANCING_PROVIDE } from '../../../domain/rebalancing/constants';
 import {
   ChangeNotificationSettingsInterface,
+  GetUserRebalanceTableInterface,
   GetUserSwapParamsInterface,
   RebalancingInterface,
 } from '../../../domain/rebalancing/interface';
@@ -17,8 +18,10 @@ export class RebalancingService {
     @Inject(REBALANCING_PROVIDE.MAIN)
     private readonly rebalancing: RebalancingInterface,
   ) {}
-  async getUserBalance(account: string): Promise<UserRebalanceTableType> {
-    return this.rebalancing.getUserRebalanceTable(account);
+  async getUserBalance(
+    params: GetUserRebalanceTableInterface,
+  ): Promise<UserRebalanceTableType> {
+    return this.rebalancing.getUserRebalanceTable(params);
   }
 
   async changeNotificationSettings({

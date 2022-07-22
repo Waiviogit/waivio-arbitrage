@@ -12,7 +12,9 @@ import { UserRebalancingDocumentType } from '../../../persistence/user-rebalanci
 import { UserRebalancing } from '../../../persistence/user-rebalancing/user-rebalancing.schema';
 
 export interface RebalancingInterface {
-  getUserRebalanceTable(account: string): Promise<UserRebalanceTableType>;
+  getUserRebalanceTable(
+    params: GetUserRebalanceTableInterface,
+  ): Promise<UserRebalanceTableType>;
 
   changeNotificationSettings({
     account,
@@ -98,4 +100,14 @@ export interface GetNewQuantityToSwapInterface {
   quantityToSwap: string;
   newPercent: string;
   percentRatioDiff: string;
+}
+
+export interface GetUserRebalanceTableInterface {
+  account: string;
+  showAll?: boolean;
+}
+
+export interface GetInitialValuesInterface {
+  account: string;
+  showAll?: boolean;
 }
