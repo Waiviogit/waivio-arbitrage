@@ -1,5 +1,5 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProfitDto, ProfitReportDto } from '../../dto/profit';
 
 export class ProfitControllerDoc {
@@ -23,6 +23,10 @@ export class ProfitControllerDoc {
 
   static addTokenToReport(): MethodDecorator {
     return applyDecorators(
+      ApiHeader({
+        name: 'access-token',
+        required: true,
+      }),
       ApiOperation({
         summary: 'endpoint for adding token to report',
         description: 'endpoint for adding token to report',
@@ -37,6 +41,10 @@ export class ProfitControllerDoc {
 
   static editQuantity(): MethodDecorator {
     return applyDecorators(
+      ApiHeader({
+        name: 'access-token',
+        required: true,
+      }),
       ApiOperation({
         summary: 'endpoint for editing token',
         description: 'endpoint for editing token',
@@ -51,6 +59,10 @@ export class ProfitControllerDoc {
 
   static deleteTokenFromReport(): MethodDecorator {
     return applyDecorators(
+      ApiHeader({
+        name: 'access-token',
+        required: true,
+      }),
       ApiOperation({
         summary: 'endpoint for deleting token from report',
         description: 'endpoint for deleting token from report',

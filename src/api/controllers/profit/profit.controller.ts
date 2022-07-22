@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   DeleteReportTokenDto,
@@ -15,6 +16,7 @@ import {
 } from '../../dto/profit';
 import { ProfitService } from './profit.service';
 import { ProfitControllerDoc } from './profit.controller.doc';
+import { AuthGuard } from '../../guards';
 
 @Controller('profit')
 @ProfitControllerDoc.main()
@@ -22,6 +24,7 @@ export class ProfitController {
   constructor(private readonly profitService: ProfitService) {}
 
   @Post('report/:account')
+  @UseGuards(AuthGuard)
   @ProfitControllerDoc.addTokenToReport()
   async addTokenToReport(
     @Param('account') account: string,
@@ -34,6 +37,7 @@ export class ProfitController {
   }
 
   @Patch('report/:account')
+  @UseGuards(AuthGuard)
   @ProfitControllerDoc.editQuantity()
   async editQuantity(
     @Param('account') account: string,
@@ -46,6 +50,7 @@ export class ProfitController {
   }
 
   @Delete('report/:account')
+  @UseGuards(AuthGuard)
   @ProfitControllerDoc.deleteTokenFromReport()
   async deleteTokenFromReport(
     @Param('account') account: string,
