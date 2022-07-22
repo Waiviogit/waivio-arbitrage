@@ -223,7 +223,6 @@ export class Rebalancing implements RebalancingInterface {
         tradeFeeMul: DEFAULT_TRADE_FEE_MUL,
         pool,
       });
-      swapOutput.json.contractPayload.balances = this.addBalancesInfoIntoPayload(row);
       const updatedPoolRatio = new BigNumber(
         swapOutput.updatedPool.quoteQuantity,
       )
@@ -253,7 +252,6 @@ export class Rebalancing implements RebalancingInterface {
       tradeFeeMul: DEFAULT_TRADE_FEE_MUL,
       pool: firstPool,
     });
-    firstSwap.json.contractPayload.balances = this.addBalancesInfoIntoPayload(row);
 
     const firstImpact = new BigNumber(
       this.getDiffPercent(firstPool.basePrice, firstSwap.updatedPool.basePrice),
@@ -539,10 +537,15 @@ export class Rebalancing implements RebalancingInterface {
       return { error: { status: 422, message: 'Marketpools error' } };
     }
 
+    const jsonArray = _.isArray(earnRebalance.json)
+      ? earnRebalance.json
+      : [earnRebalance.json];
+    jsonArray[0].contractPayload.balances = this.addBalancesInfoIntoPayload(rebalancePair);
+
     return {
       from: earnRebalance.from,
       to: earnRebalance.to,
-      json: JSON.stringify(earnRebalance.json),
+      json: JSON.stringify(jsonArray),
       priceImpact: earnRebalance.priceImpact,
     };
   }
