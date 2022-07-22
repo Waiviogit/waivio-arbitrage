@@ -5,5 +5,3 @@ export class DeleteReportTokenDto extends OmitType(ProfitDto, [
   'account',
   'quantity',
 ]) {}
-{
-}
