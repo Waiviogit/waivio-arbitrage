@@ -15,6 +15,15 @@ export type SwapJsonType = {
     minAmountOut: string;
     tradeType: string;
     tokenPair: string;
+    balances?: BalancesBeforeSwapType;
   };
   contractName: string;
+};
+
+export type BalancesBeforeSwapType = {
+  dbField: string;
+  symbolIn: string;
+  symbolOut: string;
+  symbolInQuantity: string;
+  symbolOutQuantity: string;
 };

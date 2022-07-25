@@ -34,7 +34,10 @@ import {
   REBALANCING_POOLS,
 } from './constants';
 import * as _ from 'lodash';
-import { EngineBalanceType } from '../../services/hive-engine-api/types';
+import {
+  BalancesBeforeSwapType,
+  EngineBalanceType,
+} from '../../services/hive-engine-api/types';
 import {
   EarnRebalanceType,
   HoldingsType,
@@ -534,10 +537,15 @@ export class Rebalancing implements RebalancingInterface {
       return { error: { status: 422, message: 'Marketpools error' } };
     }
 
+    const jsonArray = _.isArray(earnRebalance.json)
+      ? earnRebalance.json
+      : [earnRebalance.json];
+    jsonArray[0].contractPayload.balances = this.addBalancesInfoIntoPayload(rebalancePair);
+
     return {
       from: earnRebalance.from,
       to: earnRebalance.to,
-      json: JSON.stringify(earnRebalance.json),
+      json: JSON.stringify(jsonArray),
       priceImpact: earnRebalance.priceImpact,
     };
   }
@@ -550,5 +558,15 @@ export class Rebalancing implements RebalancingInterface {
       filter: { account },
       update,
     });
+  }
+
+  addBalancesInfoIntoPayload(pool: OpenMarketType): BalancesBeforeSwapType {
+    return {
+      dbField: pool.dbField,
+      symbolIn: pool.base,
+      symbolOut: pool.quote,
+      symbolInQuantity: pool.baseQuantity,
+      symbolOutQuantity: pool.quoteQuantity
+    };
   }
 }
