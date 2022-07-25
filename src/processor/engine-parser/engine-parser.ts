@@ -115,7 +115,10 @@ export class EngineParser implements EngineParserInterface {
     const dataForNotifications = [];
     for (const user of users) {
       const userAndMarketInfo =
-        await this._rebalancingDomain.getUserRebalanceTable(user.account);
+        await this._rebalancingDomain.getUserRebalanceTable({
+          account: user.account,
+          showAll: true,
+        });
       const pools = userAndMarketInfo.table.filter((pool) =>
         Object.keys(user.toObject()).some(
           (pair) =>

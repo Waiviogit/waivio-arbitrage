@@ -5,8 +5,8 @@ import { CONNECTION_MONGO } from './constants';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(configService.getMongoWaivioConnectionString(), {
-      connectionName: CONNECTION_MONGO.WAIVIO,
+    MongooseModule.forRoot(configService.getMongoArbitrageConnectionString(), {
+      connectionName: CONNECTION_MONGO.ARBITRAGE,
     }),
   ],
 })

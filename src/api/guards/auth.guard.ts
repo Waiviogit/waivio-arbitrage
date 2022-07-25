@@ -17,8 +17,8 @@ export class AuthGuard implements CanActivate {
     headers,
     path,
   }: ValidateRequestType): Promise<boolean> {
-    const [, , , name] = path.split('/');
-    const account = headers.account || name;
+    const splitPath = path.split('/');
+    const account = headers.account || splitPath[splitPath.length - 1];
     const token = headers['access-token'];
 
     if (!account || !token) return false;

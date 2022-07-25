@@ -17,7 +17,7 @@ import { UserRebalancingPersistenceProvider } from './user-rebalancing.persisten
           collection: COLLECTION.REBALANCING,
         },
       ],
-      CONNECTION_MONGO.WAIVIO,
+      CONNECTION_MONGO.ARBITRAGE,
     ),
   ],
   providers: [UserRebalancingPersistenceProvider],

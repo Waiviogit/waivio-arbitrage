@@ -6,10 +6,12 @@ import {
   Patch,
   Post,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { RebalancingService } from './rebalancing.service';
 import { RebalancingControllerDoc } from './rebalancing.controller.doc';
 import {
+  GetRebalanceTableDto,
   RebalanceChangeSettingsInDto,
   RebalanceSwapInDto,
   RebalanceTableDto,
@@ -27,8 +29,12 @@ export class RebalancingController {
   @RebalancingControllerDoc.getUserBalance()
   async getUserBalance(
     @Param('account') account: string,
+    @Query() queryParams: GetRebalanceTableDto,
   ): Promise<RebalanceTableDto> {
-    return this.rebalancingService.getUserBalance(account);
+    return this.rebalancingService.getUserBalance({
+      account,
+      ...queryParams,
+    });
   }
 
   @Patch(':account')

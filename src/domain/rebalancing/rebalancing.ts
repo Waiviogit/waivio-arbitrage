@@ -8,11 +8,13 @@ import {
   GetDirectPoolMarketInterface,
   GetEarnRebalanceInterface,
   GetIndirectPoolMarketInterface,
+  GetInitialValuesInterface,
   GetNewQuantityToSwapInterface,
   GetPairRatioBalanceInterface,
   GetPoolMarketInterface,
   GetRebalanceSwapOutputInterface,
   GetRebalanceTableRowsInterface,
+  GetUserRebalanceTableInterface,
   GetUserSwapParamsInterface,
   RebalancingInterface,
 } from './interface';
@@ -53,6 +55,9 @@ import BigNumber from 'bignumber.js';
 import { USER_REBALANCING_PROVIDE } from '../../persistence/user-rebalancing/constants';
 import { UserRebalancingRepositoryInterface } from '../../persistence/user-rebalancing/interface';
 import { UserRebalancingDocumentType } from '../../persistence/user-rebalancing/types';
+import { formatTwoNumbersAfterZero } from '../../common/helpers';
+import { HOLDINGS_PERSISTENCE_PROVIDE } from '../../persistence/initial-holdings/constants';
+import { InitialHoldingsRepositoryInterface } from '../../persistence/initial-holdings/interface';
 
 @Injectable()
 export class Rebalancing implements RebalancingInterface {
@@ -63,6 +68,8 @@ export class Rebalancing implements RebalancingInterface {
     private readonly swapHelper: SwapHelperInterface,
     @Inject(USER_REBALANCING_PROVIDE.REPOSITORY)
     private readonly userRebalancingRepository: UserRebalancingRepositoryInterface,
+    @Inject(HOLDINGS_PERSISTENCE_PROVIDE.REPOSITORY)
+    private readonly initialHoldingsRepository: InitialHoldingsRepositoryInterface,
   ) {}
 
   async getNoZeroBalance(account: string): Promise<EngineBalanceType[]> {
@@ -439,14 +446,6 @@ export class Rebalancing implements RebalancingInterface {
     };
   }
 
-  formatEarn(earn: string): string {
-    if (new BigNumber(earn).abs().eq(0)) return earn;
-    if (new BigNumber(earn).abs().gte(0.1)) {
-      return new BigNumber(earn).toFixed(2, BigNumber.ROUND_UP);
-    }
-    return earn.match(/-?0\.0+../g)[0];
-  }
-
   getRebalanceTableRows({
     openMarkets,
     pools,
@@ -456,7 +455,7 @@ export class Rebalancing implements RebalancingInterface {
         row,
         pools,
       });
-      row.earn = this.formatEarn(earn);
+      row.earn = formatTwoNumbersAfterZero(earn);
       row.rebalanceBase = rebalanceBase;
       row.rebalanceQuote = rebalanceQuote;
       row.difference = new BigNumber(row.difference).abs().toFixed(2);
@@ -471,20 +470,41 @@ export class Rebalancing implements RebalancingInterface {
     return openMarkets as RebalanceTableRowType[];
   }
 
-  async getUserRebalanceTable(
-    account: string,
-  ): Promise<UserRebalanceTableType> {
-    const user = await this.userRebalancingRepository.findOneOrCreate(account);
+  async getInitialValues({
+    account,
+    showAll,
+  }: GetInitialValuesInterface): Promise<HoldingsType[]> {
     const initialValues = [
       ...REBALANCE_PAIRS_WAIV,
       ...REBALANCE_PAIRS_HIVE,
       ...REBALANCE_PAIRS_BTC,
       ...REBALANCE_PAIRS_ETH,
     ] as HoldingsType[];
-    const balances = await this.getNoZeroBalance(account);
-    const pools = await this.hiveEngineClient.getMarketPools({
-      tokenPair: { $in: REBALANCING_POOLS },
+    if (showAll) return initialValues;
+
+    const initialHoldings = await this.initialHoldingsRepository.find({
+      filter: { account },
     });
+    if (initialHoldings.length < 2) return initialValues;
+    const tokensArr = initialHoldings.map((el) => el.symbol);
+    return initialValues.filter(
+      (el) => tokensArr.includes(el.base) && tokensArr.includes(el.quote),
+    );
+  }
+
+  async getUserRebalanceTable({
+    account,
+    showAll,
+  }: GetUserRebalanceTableInterface): Promise<UserRebalanceTableType> {
+    const [user, initialValues, balances, pools] = await Promise.all([
+      this.userRebalancingRepository.findOneOrCreate(account),
+      this.getInitialValues({ account, showAll }),
+      this.getNoZeroBalance(account),
+      this.hiveEngineClient.getMarketPools({
+        tokenPair: { $in: REBALANCING_POOLS },
+      }),
+    ]);
+
     const holdings = this.calcHoldings({ balances, initialValues });
     const holdingsWithStatus = this.addActiveStatusOnPairs({ user, holdings });
 
