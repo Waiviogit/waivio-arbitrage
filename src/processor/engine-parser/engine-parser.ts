@@ -144,7 +144,7 @@ export class EngineParser implements EngineParserInterface {
       dataForNotifications.push({
         account,
         differencePercent: differencePercent.replace('-', ''),
-        tokenPair: pool.dbField,
+        tokenPair: pool.dbField.replace('_', '/'),
       });
       await this._redisNotificationClient.zadd({
         key: `rebalancing:${account}`,
