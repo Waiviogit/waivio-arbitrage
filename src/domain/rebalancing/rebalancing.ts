@@ -373,11 +373,11 @@ export class Rebalancing implements RebalancingInterface {
       return zeroResp;
     }
 
-    if (new BigNumber(row.difference).lt(0.25) && row.directPool) {
+    if (new BigNumber(row.difference).abs().lt(0.25) && row.directPool) {
       return zeroResp;
     }
 
-    if (new BigNumber(row.difference).lt(0.5) && !row.directPool) {
+    if (new BigNumber(row.difference).abs().lt(0.5) && !row.directPool) {
       return zeroResp;
     }
 
