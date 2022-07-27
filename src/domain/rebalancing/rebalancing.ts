@@ -5,6 +5,7 @@ import {
   CalcOpenMarketInterface,
   CalcRatioInterface,
   ChangeNotificationSettingsInterface,
+  GetDifferenceWithFeeInterface,
   GetDirectPoolMarketInterface,
   GetEarnRebalanceInterface,
   GetIndirectPoolMarketInterface,
@@ -347,23 +348,46 @@ export class Rebalancing implements RebalancingInterface {
     return new BigNumber(quantity).minus(reminder).toFixed(DEFAULT_PRECISION);
   }
 
+  getDifferenceWithFee({
+    difference,
+    directPool,
+  }: GetDifferenceWithFeeInterface): string {
+    const feePercent = directPool ? '0.25' : '0.5';
+    return new BigNumber(difference).lt(0) && new BigNumber(difference).gt(99)
+      ? new BigNumber(difference).plus(feePercent).toFixed()
+      : new BigNumber(difference).minus(feePercent).toFixed();
+  }
+
   getEarnRebalance({
     row,
     pools,
     slippage,
   }: GetEarnRebalanceInterface): EarnRebalanceType {
+    const zeroResp = {
+      earn: '0',
+      rebalanceBase: `0 ${row.base}`,
+      rebalanceQuote: `0 ${row.quote}`,
+    };
+
     if (new BigNumber(row.holdingsRatio).eq(0)) {
-      return {
-        earn: '0',
-        rebalanceBase: '0',
-        rebalanceQuote: '0',
-      };
+      return zeroResp;
+    }
+
+    if (new BigNumber(row.difference).lt(0.25) && row.directPool) {
+      return zeroResp;
+    }
+
+    if (new BigNumber(row.difference).lt(0.5) && !row.directPool) {
+      return zeroResp;
     }
 
     const toSwap = new BigNumber(row.difference).lt(0) ? 'quote' : 'base';
 
     let quantityToSwap = this.getQuantityToSwap({
-      difference: row.difference,
+      difference: this.getDifferenceWithFee({
+        difference: row.difference,
+        directPool: row.directPool,
+      }),
       quantity: row[`${toSwap}Quantity`],
     });
 
@@ -399,7 +423,10 @@ export class Rebalancing implements RebalancingInterface {
         swapOutput.updatedPoolRatio,
       ).toFixed(8, BigNumber.ROUND_HALF_UP);
 
-      percentRatioDiff = this.getDiffPercent(walletRatio, updatedPoolRatio);
+      percentRatioDiff = this.getDifferenceWithFee({
+        difference: this.getDiffPercent(walletRatio, updatedPoolRatio),
+        directPool: row.directPool,
+      });
 
       if (new BigNumber(percentRatioDiff).eq(previousDiff)) {
         break;

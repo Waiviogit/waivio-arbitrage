@@ -116,3 +116,8 @@ export interface getQuantityToSwapInterface {
   difference: string;
   quantity: string;
 }
+
+export interface GetDifferenceWithFeeInterface {
+  directPool: boolean;
+  difference: string;
+}
