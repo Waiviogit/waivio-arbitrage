@@ -111,3 +111,8 @@ export interface GetInitialValuesInterface {
   account: string;
   showAll?: boolean;
 }
+
+export interface getQuantityToSwapInterface {
+  difference: string;
+  quantity: string;
+}
