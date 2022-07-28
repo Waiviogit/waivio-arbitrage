@@ -384,10 +384,7 @@ export class Rebalancing implements RebalancingInterface {
     const toSwap = new BigNumber(row.difference).lt(0) ? 'quote' : 'base';
 
     let quantityToSwap = this.getQuantityToSwap({
-      difference: this.getDifferenceWithFee({
-        difference: row.difference,
-        directPool: row.directPool,
-      }),
+      difference: row.difference,
       quantity: row[`${toSwap}Quantity`],
     });
 
@@ -423,10 +420,7 @@ export class Rebalancing implements RebalancingInterface {
         swapOutput.updatedPoolRatio,
       ).toFixed(8, BigNumber.ROUND_HALF_UP);
 
-      percentRatioDiff = this.getDifferenceWithFee({
-        difference: this.getDiffPercent(walletRatio, updatedPoolRatio),
-        directPool: row.directPool,
-      });
+      percentRatioDiff = this.getDiffPercent(walletRatio, updatedPoolRatio);
 
       if (new BigNumber(percentRatioDiff).eq(previousDiff)) {
         break;
@@ -459,6 +453,7 @@ export class Rebalancing implements RebalancingInterface {
       new BigNumber(row.baseQuantity).times(row.quoteQuantity).sqrt().toFixed(),
       new BigNumber(newBaseQuantity).times(newQuoteQuantity).sqrt().toFixed(),
     );
+    if (new BigNumber(earn).lt(0)) return zeroResp;
 
     const rebalanceBase =
       toSwap === 'quote'
