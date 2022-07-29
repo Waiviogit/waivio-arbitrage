@@ -61,7 +61,6 @@ import { formatTwoNumbersAfterZero } from '../../common/helpers';
 import { HOLDINGS_PERSISTENCE_PROVIDE } from '../../persistence/initial-holdings/constants';
 import { InitialHoldingsRepositoryInterface } from '../../persistence/initial-holdings/interface';
 
-const total = 0;
 
 @Injectable()
 export class Rebalancing implements RebalancingInterface {
@@ -378,14 +377,6 @@ export class Rebalancing implements RebalancingInterface {
     };
 
     if (new BigNumber(row.holdingsRatio).eq(0)) {
-      return zeroResp;
-    }
-
-    if (new BigNumber(row.difference).abs().lt(0.25) && row.directPool) {
-      return zeroResp;
-    }
-
-    if (new BigNumber(row.difference).abs().lt(0.5) && !row.directPool) {
       return zeroResp;
     }
 
