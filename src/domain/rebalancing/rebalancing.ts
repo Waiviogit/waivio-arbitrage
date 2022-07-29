@@ -61,6 +61,8 @@ import { formatTwoNumbersAfterZero } from '../../common/helpers';
 import { HOLDINGS_PERSISTENCE_PROVIDE } from '../../persistence/initial-holdings/constants';
 import { InitialHoldingsRepositoryInterface } from '../../persistence/initial-holdings/interface';
 
+const total = 0;
+
 @Injectable()
 export class Rebalancing implements RebalancingInterface {
   constructor(
@@ -334,6 +336,12 @@ export class Rebalancing implements RebalancingInterface {
     difference,
     quantity,
   }: getQuantityToSwapInterface): string {
+    ///?
+    if (new BigNumber(difference).abs().lt(1)) {
+      return new BigNumber(quantity)
+        .times(new BigNumber(difference).div(90).abs())
+        .toFixed(DEFAULT_PRECISION);
+    }
     if (new BigNumber(difference).lt(100)) {
       return new BigNumber(quantity)
         .times(new BigNumber(difference).div(100).abs())
@@ -391,8 +399,10 @@ export class Rebalancing implements RebalancingInterface {
     let isRatioDiff, swapOutput, newBaseQuantity, newQuoteQuantity;
     let previousDiff = '1000000000';
     let percentRatioDiff;
-
+    let counter = 0;
     do {
+      counter++;
+      if (counter > 1000) return zeroResp;
       swapOutput = this.getRebalanceSwapOutput({
         row,
         pools,
@@ -449,11 +459,11 @@ export class Rebalancing implements RebalancingInterface {
         toSwap,
       });
     } while (isRatioDiff);
+
     const earn = this.getDiffPercent(
       new BigNumber(row.baseQuantity).times(row.quoteQuantity).sqrt().toFixed(),
       new BigNumber(newBaseQuantity).times(newQuoteQuantity).sqrt().toFixed(),
     );
-    if (new BigNumber(earn).lt(0)) return zeroResp;
 
     const rebalanceBase =
       toSwap === 'quote'
