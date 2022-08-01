@@ -96,7 +96,6 @@ export interface GetRebalanceSwapOutputInterface {
 }
 
 export interface GetNewQuantityToSwapInterface {
-  toSwap: 'base' | 'quote';
   quantityToSwap: string;
   newPercent: string;
   percentRatioDiff: string;
@@ -117,7 +116,8 @@ export interface getQuantityToSwapInterface {
   quantity: string;
 }
 
-export interface GetDifferenceWithFeeInterface {
-  directPool: boolean;
-  difference: string;
+export interface GetInitialQuantityInterface {
+  totalWalletOut: string;
+  totalWalletIn: string;
+  marketRatio: string;
 }

@@ -5,10 +5,10 @@ import {
   CalcOpenMarketInterface,
   CalcRatioInterface,
   ChangeNotificationSettingsInterface,
-  GetDifferenceWithFeeInterface,
   GetDirectPoolMarketInterface,
   GetEarnRebalanceInterface,
   GetIndirectPoolMarketInterface,
+  GetInitialQuantityInterface,
   GetInitialValuesInterface,
   GetNewQuantityToSwapInterface,
   GetPairRatioBalanceInterface,
@@ -154,8 +154,10 @@ export class Rebalancing implements RebalancingInterface {
     market,
   }: GetDirectPoolMarketInterface): PoolMarket {
     const marketRatio = this.calcRatio({ pool, market, key: 'base' });
+    const marketReverse = this.calcRatio({ pool, market, key: 'quote' });
 
     return {
+      marketReverse,
       marketRatio,
       difference: this.getDiffPercent(market.holdingsRatio, marketRatio),
     };
@@ -182,7 +184,12 @@ export class Rebalancing implements RebalancingInterface {
       .div(marketRatioQuote)
       .toFixed();
 
+    const marketReverse = new BigNumber(marketRatioQuote)
+      .div(marketRatioBase)
+      .toFixed();
+
     return {
+      marketReverse,
       marketRatio,
       difference: this.getDiffPercent(market.holdingsRatio, marketRatio),
     };
@@ -194,12 +201,13 @@ export class Rebalancing implements RebalancingInterface {
   }: CalcOpenMarketInterface): OpenMarketType[] {
     const openMarkets = [...holdings] as OpenMarketType[];
     for (const market of openMarkets) {
-      const { difference, marketRatio } = this.getPoolMarket({
+      const { difference, marketRatio, marketReverse } = this.getPoolMarket({
         market,
         pools,
       });
       market.difference = difference;
       market.marketRatio = marketRatio;
+      market.marketReverse = marketReverse;
     }
 
     return openMarkets;
@@ -237,6 +245,12 @@ export class Rebalancing implements RebalancingInterface {
       )
         .div(swapOutput.updatedPool.baseQuantity)
         .toFixed();
+
+      const updatedPoolRatioRev = new BigNumber(
+        swapOutput.updatedPool.baseQuantity,
+      )
+        .div(swapOutput.updatedPool.quoteQuantity)
+        .toFixed();
       const priceImpact = new BigNumber(
         this.getDiffPercent(pool.basePrice, swapOutput.updatedPool.basePrice),
       )
@@ -246,6 +260,7 @@ export class Rebalancing implements RebalancingInterface {
       return {
         ...swapOutput,
         updatedPoolRatio,
+        updatedPoolRatioRev,
         priceImpact,
       };
     }
@@ -280,7 +295,7 @@ export class Rebalancing implements RebalancingInterface {
     const basePool = updatedPools.find((p) => p.tokenPair === row.basePool);
     const quotePool = updatedPools.find((p) => p.tokenPair === row.quotePool);
 
-    const { marketRatio } = this.getIndirectPoolMarket({
+    const { marketRatio, marketReverse } = this.getIndirectPoolMarket({
       basePool,
       quotePool,
       market: row,
@@ -297,29 +312,17 @@ export class Rebalancing implements RebalancingInterface {
       ...secondSwap,
       json,
       updatedPoolRatio: marketRatio,
+      updatedPoolRatioRev: marketReverse,
       priceImpact: BigNumber.maximum(firstImpact, secondImpact).toFixed(2),
     };
   }
 
   getNewQuantityToSwap({
-    toSwap,
     newPercent,
     quantityToSwap,
     percentRatioDiff,
   }: GetNewQuantityToSwapInterface): string {
-    if (toSwap === 'quote') {
-      return new BigNumber(percentRatioDiff).gt(0)
-        ? new BigNumber(quantityToSwap)
-            .minus(newPercent)
-            .abs()
-            .toFixed(DEFAULT_PRECISION)
-        : new BigNumber(quantityToSwap)
-            .plus(newPercent)
-            .abs()
-            .toFixed(DEFAULT_PRECISION);
-    }
-
-    return new BigNumber(percentRatioDiff).lt(0)
+    return new BigNumber(percentRatioDiff).gt(0)
       ? new BigNumber(quantityToSwap)
           .minus(newPercent)
           .abs()
@@ -354,26 +357,24 @@ export class Rebalancing implements RebalancingInterface {
     return new BigNumber(quantity).minus(reminder).toFixed(DEFAULT_PRECISION);
   }
 
-  getDifferenceWithFee({
-    difference,
-    directPool,
-  }: GetDifferenceWithFeeInterface): string {
-    const feePercent = directPool ? '0.25' : '0.5';
-    return new BigNumber(difference).lt(0) && new BigNumber(difference).gt(99)
-      ? new BigNumber(difference).plus(feePercent).toFixed()
-      : new BigNumber(difference).minus(feePercent).toFixed();
-  }
-
-  getInitialQuantity() {
+  getInitialQuantity({
+    totalWalletIn,
+    totalWalletOut,
+    marketRatio,
+  }: GetInitialQuantityInterface): string {
     //max formula
-    // const outToken = new BigNumber(0.5)
-    //   .times(
-    //     new BigNumber(totalWalletOut).minus(totalWalletOutIn).div(marketRatio),
-    //   )
-    //   .toFixed(8);
-    //
-    // const inToken = new BigNumber(outToken).times(marketRatio).toFixed();
-    //formula with diffPercent
+    const outToken = new BigNumber(0.5)
+      .times(
+        new BigNumber(totalWalletOut).minus(
+          new BigNumber(totalWalletIn).div(marketRatio),
+        ),
+      )
+      .toFixed(DEFAULT_PRECISION);
+
+    return new BigNumber(outToken)
+      .times(marketRatio)
+      .abs()
+      .toFixed(DEFAULT_PRECISION);
   }
 
   getEarnRebalance({
@@ -392,10 +393,15 @@ export class Rebalancing implements RebalancingInterface {
     }
 
     const toSwap = new BigNumber(row.difference).lt(0) ? 'quote' : 'base';
+    const toOut = new BigNumber(row.difference).lt(0) ? 'base' : 'quote';
 
-    let quantityToSwap = this.getQuantityToSwap({
-      difference: row.difference,
-      quantity: row[`${toSwap}Quantity`],
+    const reverseRatio = toSwap === 'base';
+    const marketRatio = reverseRatio ? row.marketReverse : row.marketRatio;
+
+    let quantityToSwap = this.getInitialQuantity({
+      marketRatio,
+      totalWalletOut: row[`${toOut}Quantity`],
+      totalWalletIn: row[`${toSwap}Quantity`],
     });
 
     let isRatioDiff, swapOutput, newBaseQuantity, newQuoteQuantity;
@@ -404,7 +410,7 @@ export class Rebalancing implements RebalancingInterface {
     let counter = 0;
     do {
       counter++;
-      if (counter > 1000) return zeroResp;
+      if (counter > 2000) return zeroResp;
       swapOutput = this.getRebalanceSwapOutput({
         row,
         pools,
@@ -425,18 +431,19 @@ export class Rebalancing implements RebalancingInterface {
               .plus(swapOutput.amountOut)
               .toFixed();
 
-      const walletRatio = new BigNumber(newQuoteQuantity)
-        .div(newBaseQuantity)
-        .toFixed(8, BigNumber.ROUND_HALF_UP);
-      const updatedPoolRatio = new BigNumber(
-        swapOutput.updatedPoolRatio,
-      ).toFixed(8, BigNumber.ROUND_HALF_UP);
+      const walletRatio = reverseRatio
+        ? new BigNumber(newBaseQuantity).div(newQuoteQuantity).toFixed()
+        : new BigNumber(newQuoteQuantity).div(newBaseQuantity).toFixed();
+
+      const updatedPoolRatio = reverseRatio
+        ? swapOutput.updatedPoolRatioRev
+        : swapOutput.updatedPoolRatio;
 
       percentRatioDiff = this.getDiffPercent(walletRatio, updatedPoolRatio);
 
-      if (new BigNumber(percentRatioDiff).eq(previousDiff)) {
-        break;
-      }
+      // if (new BigNumber(percentRatioDiff).eq(previousDiff)) {
+      //   break;
+      // }
 
       if (
         new BigNumber(percentRatioDiff)
@@ -446,9 +453,10 @@ export class Rebalancing implements RebalancingInterface {
         previousDiff = percentRatioDiff;
       }
 
-      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.1);
+      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.03);
 
       if (!isRatioDiff) break;
+
       const newPercent = this.getQuantityToSwap({
         difference: percentRatioDiff,
         quantity: quantityToSwap,
@@ -458,7 +466,6 @@ export class Rebalancing implements RebalancingInterface {
         quantityToSwap,
         newPercent,
         percentRatioDiff,
-        toSwap,
       });
     } while (isRatioDiff);
 
