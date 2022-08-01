@@ -453,7 +453,7 @@ export class Rebalancing implements RebalancingInterface {
         previousDiff = percentRatioDiff;
       }
 
-      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.03);
+      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.1);
 
       if (!isRatioDiff) break;
 
@@ -468,6 +468,7 @@ export class Rebalancing implements RebalancingInterface {
         percentRatioDiff,
       });
     } while (isRatioDiff);
+    console.log(counter, percentRatioDiff)
 
     const earn = this.getDiffPercent(
       new BigNumber(row.baseQuantity).times(row.quoteQuantity).sqrt().toFixed(),
