@@ -28,6 +28,7 @@ export type RebalanceTableRowType = OpenMarketType & {
 export type PoolMarket = {
   marketRatio: string;
   difference: string;
+  marketReverse: string;
 };
 
 export type UserRebalanceTableType = {
@@ -62,6 +63,7 @@ export type SwapRebalanceOutputType = {
   amountOut: string;
   updatedPool: MarketPoolType;
   updatedPoolRatio: string;
+  updatedPoolRatioRev: string;
   priceImpact: string;
 };
 
