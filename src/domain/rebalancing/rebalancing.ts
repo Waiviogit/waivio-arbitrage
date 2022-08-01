@@ -453,7 +453,7 @@ export class Rebalancing implements RebalancingInterface {
         previousDiff = percentRatioDiff;
       }
 
-      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.03);
+      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.1);
 
       if (!isRatioDiff) break;
 
