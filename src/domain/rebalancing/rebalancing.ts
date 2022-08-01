@@ -61,7 +61,6 @@ import { formatTwoNumbersAfterZero } from '../../common/helpers';
 import { HOLDINGS_PERSISTENCE_PROVIDE } from '../../persistence/initial-holdings/constants';
 import { InitialHoldingsRepositoryInterface } from '../../persistence/initial-holdings/interface';
 
-
 @Injectable()
 export class Rebalancing implements RebalancingInterface {
   constructor(
@@ -363,6 +362,18 @@ export class Rebalancing implements RebalancingInterface {
     return new BigNumber(difference).lt(0) && new BigNumber(difference).gt(99)
       ? new BigNumber(difference).plus(feePercent).toFixed()
       : new BigNumber(difference).minus(feePercent).toFixed();
+  }
+
+  getInitialQuantity() {
+    //max formula
+    // const outToken = new BigNumber(0.5)
+    //   .times(
+    //     new BigNumber(totalWalletOut).minus(totalWalletOutIn).div(marketRatio),
+    //   )
+    //   .toFixed(8);
+    //
+    // const inToken = new BigNumber(outToken).times(marketRatio).toFixed();
+    //formula with diffPercent
   }
 
   getEarnRebalance({
