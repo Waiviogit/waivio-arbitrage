@@ -338,11 +338,11 @@ export class Rebalancing implements RebalancingInterface {
     quantity,
   }: getQuantityToSwapInterface): string {
     ///?
-    if (new BigNumber(difference).abs().lt(1)) {
-      return new BigNumber(quantity)
-        .times(new BigNumber(difference).div(90).abs())
-        .toFixed(DEFAULT_PRECISION);
-    }
+    // if (new BigNumber(difference).abs().lt(1)) {
+    //   return new BigNumber(quantity)
+    //     .times(new BigNumber(difference).div(90).abs())
+    //     .toFixed(DEFAULT_PRECISION);
+    // }
     if (new BigNumber(difference).lt(100)) {
       return new BigNumber(quantity)
         .times(new BigNumber(difference).div(100).abs())
@@ -453,7 +453,7 @@ export class Rebalancing implements RebalancingInterface {
         previousDiff = percentRatioDiff;
       }
 
-      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.1);
+      isRatioDiff = new BigNumber(percentRatioDiff).abs().gt(0.03);
 
       if (!isRatioDiff) break;
 
@@ -468,7 +468,6 @@ export class Rebalancing implements RebalancingInterface {
         percentRatioDiff,
       });
     } while (isRatioDiff);
-    console.log(counter, percentRatioDiff)
 
     const earn = this.getDiffPercent(
       new BigNumber(row.baseQuantity).times(row.quoteQuantity).sqrt().toFixed(),
