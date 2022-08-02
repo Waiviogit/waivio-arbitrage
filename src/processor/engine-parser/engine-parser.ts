@@ -9,11 +9,8 @@ import {
   REBALANCING_PROVIDE,
 } from '../../domain/rebalancing/constants';
 import { RebalancingInterface } from '../../domain/rebalancing/interface';
-import { USER_REBALANCING_PROVIDE } from '../../persistence/user-rebalancing/constants';
-import { UserRebalancingRepositoryInterface } from '../../persistence/user-rebalancing/interface';
 import { UserRebalancingDocumentType } from '../../persistence/user-rebalancing/types';
 import BigNumber from 'bignumber.js';
-import { OpenMarketType } from '../../domain/rebalancing/types';
 import { NotificationSocketClient } from '../../services/notification-socket/notification-socket.client';
 import { NotificationDataType } from '../../services/notification-socket/types/notification.types';
 import * as _ from 'lodash';
@@ -25,6 +22,13 @@ import {
 } from '../../services/notification-socket/constants/notification-socket.constants';
 import * as moment from 'moment';
 import { SEND_UPDATE_MAX_TIME_MS } from './constants';
+import { UserRebalancingRepositoryInterface } from '../../persistence/user-rebalancing/interface';
+import { USER_REBALANCING_PROVIDE } from '../../persistence/user-rebalancing/constants';
+import {
+  CheckDifferencePercentChangeType,
+  CheckNotificationSentRecentlyType,
+  PrepareNotificationType
+} from './types/engine-parser.types';
 
 @Injectable()
 export class EngineParser implements EngineParserInterface {
@@ -104,7 +108,7 @@ export class EngineParser implements EngineParserInterface {
   private async _getUsersToCheck(
     tokenPairs: string[],
   ): Promise<UserRebalancingDocumentType[]> {
-    return await this._userRebalancingRepository.find({
+    return this._userRebalancingRepository.find({
       filter: { $or: tokenPairs.map((pair) => ({ [pair]: true })) },
     });
   }
@@ -129,7 +133,11 @@ export class EngineParser implements EngineParserInterface {
       );
       if (pools.length) {
         dataForNotifications.push(
-          ...(await this._prepareNotificationData(pools, user.account)),
+          ...(await this._prepareNotificationData({
+            pools,
+            account: user.account,
+            differencePercentSubscription: user.differencePercent,
+          })),
         );
       }
     }
@@ -137,16 +145,18 @@ export class EngineParser implements EngineParserInterface {
     return dataForNotifications;
   }
 
-  private async _prepareNotificationData(
-    pools: OpenMarketType[],
-    account: string,
-  ): Promise<NotificationDataType[]> {
+  private async _prepareNotificationData({
+    pools,
+    account,
+    differencePercentSubscription,
+  }: PrepareNotificationType): Promise<NotificationDataType[]> {
     const dataForNotifications = [];
     for (const pool of pools) {
-      const recentNotification = await this._checkIfNotificationSentRecently(
-        pool,
-        account,
-      );
+      const recentNotification = await this._checkIfNotificationSentRecently({
+          pool,
+          account,
+          differencePercentSubscription
+        });
       if (recentNotification) continue;
 
       const differencePercent = new BigNumber(pool.difference).toFixed(2);
@@ -165,21 +175,22 @@ export class EngineParser implements EngineParserInterface {
     return dataForNotifications;
   }
 
-  private async _checkIfNotificationSentRecently(
-    pool: OpenMarketType,
-    account: string,
-  ): Promise<boolean> {
+  private async _checkIfNotificationSentRecently({
+    pool,
+    account,
+    differencePercentSubscription,
+  }: CheckNotificationSentRecentlyType): Promise<boolean> {
     /** clear sorted set from members older than a day */
     await this._redisNotificationClient.zremrangebyscore({
       key: `rebalancing:${account}`,
       min: 1,
       max: moment.utc().subtract(1, 'day').unix(),
     });
-    /** checking if notification was sent to this account within 10 minutes */
+    /** checking if notification was sent to this account within 5 minutes */
     const recentNotifications =
       await this._redisNotificationClient.zrangebyscore({
         key: `rebalancing:${account}`,
-        min: moment.utc().subtract(10, 'minutes').unix(),
+        min: moment.utc().subtract(5, 'minutes').unix(),
         max: moment.utc().unix(),
       });
     if (recentNotifications.length) {
@@ -189,28 +200,33 @@ export class EngineParser implements EngineParserInterface {
       if (samePair) return true;
     }
 
-    /** getting notifications older than 10 minutes */
+    /** getting notifications older than 5 minutes */
     const accountNotifications =
       await this._redisNotificationClient.zrangebyscore({
         key: `rebalancing:${account}`,
         min: 1,
-        max: moment.utc().subtract(10, 'minutes').unix(),
+        max: moment.utc().subtract(5, 'minutes').unix(),
       });
     if (!accountNotifications.length) return false;
 
-    const stepChange = this._checkDifferencePercentStepChange(
-      accountNotifications,
+    const percentStep = new BigNumber(differencePercentSubscription)
+      .multipliedBy(0.002)
+      .toFixed();
+    const stepChange = this._checkDifferencePercentStepChange({
+      notifications: accountNotifications,
       pool,
-    );
+      percentStep,
+    });
     if (stepChange) return false;
 
     return true;
   }
 
-  private _checkDifferencePercentStepChange(
-    notifications: string[],
-    pool: OpenMarketType,
-  ): boolean {
+  private _checkDifferencePercentStepChange({
+    notifications,
+    pool,
+    percentStep,
+  }: CheckDifferencePercentChangeType): boolean {
     const savedNotifications = notifications.filter((el) =>
       el.includes(pool.dbField),
     );
@@ -221,7 +237,7 @@ export class EngineParser implements EngineParserInterface {
     const stepChange = new BigNumber(pool.difference)
       .dividedBy(differencePercent)
       .minus(1);
-    if (stepChange.gte(0.2)) return true;
+    if (stepChange.gte(percentStep)) return true;
 
     return false;
   }
