@@ -410,7 +410,10 @@ export class Rebalancing implements RebalancingInterface {
     let counter = 0;
     do {
       counter++;
-      if (counter > 2000) return zeroResp;
+      if (counter > 2000) {
+        console.log('failed', row.dbField);
+        return zeroResp;
+      }
       swapOutput = this.getRebalanceSwapOutput({
         row,
         pools,
@@ -457,16 +460,27 @@ export class Rebalancing implements RebalancingInterface {
 
       if (!isRatioDiff) break;
 
-      const newPercent = this.getQuantityToSwap({
-        difference: percentRatioDiff,
-        quantity: quantityToSwap,
-      });
+      if (new BigNumber(percentRatioDiff).eq(previousDiff)) {
+        const newPercent = this.getQuantityToSwap({
+          difference: percentRatioDiff,
+          quantity: quantityToSwap,
+        });
 
-      quantityToSwap = this.getNewQuantityToSwap({
-        quantityToSwap,
-        newPercent,
-        percentRatioDiff,
-      });
+        quantityToSwap = this.getNewQuantityToSwap({
+          quantityToSwap,
+          newPercent,
+          percentRatioDiff,
+        });
+      } else {
+        quantityToSwap = this.getInitialQuantity({
+          marketRatio: new BigNumber(walletRatio)
+            .times(updatedPoolRatio)
+            .sqrt()
+            .toFixed(),
+          totalWalletOut: row[`${toOut}Quantity`],
+          totalWalletIn: row[`${toSwap}Quantity`],
+        });
+      }
     } while (isRatioDiff);
 
     const earn = this.getDiffPercent(
