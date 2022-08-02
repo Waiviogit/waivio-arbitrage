@@ -8,6 +8,7 @@ import {
 import { InitialHoldingsDocumentType } from '../../../persistence/initial-holdings/types';
 import { ProfitReportType } from '../../../domain/accumulated-profit/types';
 import BigNumber from 'bignumber.js';
+import { DEFAULT_PRECISION } from '../../../domain/rebalancing/constants';
 
 @Injectable()
 export class ProfitService {
@@ -19,14 +20,20 @@ export class ProfitService {
   async addTokenToReport(
     params: EditReportInterface,
   ): Promise<InitialHoldingsDocumentType> {
-    params.quantity = new BigNumber(params.quantity).toFixed();
+    params.quantity = new BigNumber(params.quantity).toFixed(
+      DEFAULT_PRECISION,
+      BigNumber.ROUND_HALF_UP,
+    );
     return this.profitReport.addTokenToReport(params);
   }
 
   async editQuantity(
     params: EditReportInterface,
   ): Promise<InitialHoldingsDocumentType> {
-    params.quantity = new BigNumber(params.quantity).toFixed();
+    params.quantity = new BigNumber(params.quantity).toFixed(
+      DEFAULT_PRECISION,
+      BigNumber.ROUND_HALF_UP,
+    );
     return this.profitReport.editTokenQuantity(params);
   }
 

@@ -1,7 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsString,
+  IsNumberString,
+  Validate,
+} from 'class-validator';
 import { ENGINE_TOKENS_SUPPORTED } from '../../../domain/rebalancing/constants';
-import { Type } from 'class-transformer';
+import { CustomStringMin } from '../../../common/validators';
 
 export class ProfitDto {
   @IsString()
@@ -15,9 +21,8 @@ export class ProfitDto {
   @ApiProperty({ type: String, enum: Object.values(ENGINE_TOKENS_SUPPORTED) })
   symbol: string;
 
-  @IsNumber()
-  @Min(0.00000001)
-  @Type(() => Number)
+  @IsNumberString()
+  @Validate(CustomStringMin, [0.00000001])
   @ApiProperty({ type: String })
   quantity: string;
 }
