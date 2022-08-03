@@ -20,20 +20,12 @@ export class ProfitService {
   async addTokenToReport(
     params: EditReportInterface,
   ): Promise<InitialHoldingsDocumentType> {
-    params.quantity = new BigNumber(params.quantity).toFixed(
-      DEFAULT_PRECISION,
-      BigNumber.ROUND_HALF_UP,
-    );
     return this.profitReport.addTokenToReport(params);
   }
 
   async editQuantity(
     params: EditReportInterface,
   ): Promise<InitialHoldingsDocumentType> {
-    params.quantity = new BigNumber(params.quantity).toFixed(
-      DEFAULT_PRECISION,
-      BigNumber.ROUND_HALF_UP,
-    );
     return this.profitReport.editTokenQuantity(params);
   }
 
