@@ -210,7 +210,7 @@ export class EngineParser implements EngineParserInterface {
     if (!accountNotifications.length) return false;
 
     const percentStep = new BigNumber(differencePercentSubscription)
-      .multipliedBy(0.002)
+      .multipliedBy(0.2)
       .toFixed();
     const stepChange = this._checkDifferencePercentStepChange({
       notifications: accountNotifications,
@@ -234,9 +234,7 @@ export class EngineParser implements EngineParserInterface {
 
     const differencePercent =
       savedNotifications[savedNotifications.length - 1].split(':')[1];
-    const stepChange = new BigNumber(pool.difference)
-      .dividedBy(differencePercent)
-      .minus(1);
+    const stepChange = new BigNumber(pool.difference).minus(differencePercent);
     if (stepChange.gte(percentStep)) return true;
 
     return false;
