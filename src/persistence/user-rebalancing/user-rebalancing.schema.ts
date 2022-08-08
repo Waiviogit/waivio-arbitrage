@@ -52,6 +52,18 @@ export class UserRebalancing {
 
   @Prop({ type: Boolean, default: false })
   SPS_LTC?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  DEC_HIVE?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  DEC_ETH?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  DEC_BTC?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  DEC_LTC?: boolean;
 }
 
 export const UserRebalancingSchema =
