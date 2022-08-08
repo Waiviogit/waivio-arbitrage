@@ -49,6 +49,11 @@ export class UserRebalancingDto {
   @IsOptional()
   @IsBoolean()
   @ApiProperty({ type: Boolean })
+  HIVE_LTC?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty({ type: Boolean })
   BTC_ETH?: boolean;
 
   @IsOptional()
@@ -60,4 +65,24 @@ export class UserRebalancingDto {
   @IsBoolean()
   @ApiProperty({ type: Boolean })
   ETH_HBD?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty({ type: Boolean })
+  SPS_HIVE?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty({ type: Boolean })
+  SPS_ETH?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty({ type: Boolean })
+  SPS_BTC?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiProperty({ type: Boolean })
+  SPS_LTC?: boolean;
 }
