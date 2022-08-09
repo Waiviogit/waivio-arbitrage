@@ -42,14 +42,14 @@ export class SwapHelper implements SwapHelperInterface {
         liquidityIn,
         liquidityOut,
       }),
-    ).toFixed(Number(precision), BigNumber.ROUND_DOWN);
+    ).toFixed(precision, BigNumber.ROUND_DOWN);
     const minAmountOut = new BigNumber(amountOut)
       .minus(
         new BigNumber(amountOut)
           .multipliedBy(slippage)
-          .toFixed(Number(precision), BigNumber.ROUND_DOWN),
+          .toFixed(precision, BigNumber.ROUND_DOWN),
       )
-      .toFixed(Number(precision), BigNumber.ROUND_DOWN);
+      .toFixed(precision, BigNumber.ROUND_DOWN);
 
     const tokenPairDelta =
       symbol === baseSymbol
@@ -93,10 +93,10 @@ export class SwapHelper implements SwapHelperInterface {
 
     uPool.basePrice = new BigNumber(uPool.quoteQuantity)
       .dividedBy(uPool.baseQuantity)
-      .toFixed(pool.precision, BigNumber.ROUND_DOWN);
+      .toFixed();
     uPool.quotePrice = new BigNumber(uPool.baseQuantity)
       .dividedBy(uPool.quoteQuantity)
-      .toFixed(pool.precision, BigNumber.ROUND_DOWN);
+      .toFixed();
     return uPool;
   }
 

@@ -30,6 +30,9 @@ export class UserRebalancing {
   HIVE_ETH?: boolean;
 
   @Prop({ type: Boolean, default: false })
+  HIVE_LTC?: boolean;
+
+  @Prop({ type: Boolean, default: false })
   BTC_ETH?: boolean;
 
   @Prop({ type: Boolean, default: false })
@@ -37,6 +40,30 @@ export class UserRebalancing {
 
   @Prop({ type: Boolean, default: false })
   ETH_HBD?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  SPS_HIVE?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  SPS_ETH?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  SPS_BTC?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  SPS_LTC?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  DEC_HIVE?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  DEC_ETH?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  DEC_BTC?: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  DEC_LTC?: boolean;
 }
 
 export const UserRebalancingSchema =

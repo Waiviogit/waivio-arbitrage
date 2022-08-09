@@ -32,10 +32,13 @@ import {
   DEFAULT_TRADE_FEE_MUL,
   ENGINE_TOKENS_SUPPORTED,
   REBALANCE_PAIRS_BTC,
+  REBALANCE_PAIRS_DEC,
   REBALANCE_PAIRS_ETH,
   REBALANCE_PAIRS_HIVE,
+  REBALANCE_PAIRS_SPS,
   REBALANCE_PAIRS_WAIV,
   REBALANCING_POOLS,
+  TOKENS_PRECISION,
 } from './constants';
 import * as _ from 'lodash';
 import {
@@ -223,6 +226,10 @@ export class Rebalancing implements RebalancingInterface {
     return holdings;
   }
 
+  getPrecision(symbol: string): number {
+    return TOKENS_PRECISION[symbol] || DEFAULT_PRECISION;
+  }
+
   getRebalanceSwapOutput({
     row,
     pools,
@@ -232,25 +239,29 @@ export class Rebalancing implements RebalancingInterface {
   }: GetRebalanceSwapOutputInterface): SwapRebalanceOutputType {
     if (row.directPool) {
       const pool = pools.find((p) => p.tokenPair === row.pool);
+      const [base] = pool.tokenPair.split(':');
+
+      const outSymbol = row.base === row[toSwap] ? row.quote : row.base;
+
       const swapOutput = this.swapHelper.getSwapOutput({
         symbol: row[toSwap],
         amountIn: quantityToSwap,
         slippage,
-        precision: DEFAULT_PRECISION,
+        precision: this.getPrecision(outSymbol),
         tradeFeeMul: DEFAULT_TRADE_FEE_MUL,
         pool,
       });
-      const updatedPoolRatio = new BigNumber(
-        swapOutput.updatedPool.quoteQuantity,
-      )
-        .div(swapOutput.updatedPool.baseQuantity)
-        .toFixed();
 
-      const updatedPoolRatioRev = new BigNumber(
-        swapOutput.updatedPool.baseQuantity,
-      )
-        .div(swapOutput.updatedPool.quoteQuantity)
-        .toFixed();
+      const updatedPoolRatio =
+        base === row.base
+          ? swapOutput.updatedPool.basePrice
+          : swapOutput.updatedPool.quotePrice;
+
+      const updatedPoolRatioRev =
+        base === row.base
+          ? swapOutput.updatedPool.quotePrice
+          : swapOutput.updatedPool.basePrice;
+
       const priceImpact = new BigNumber(
         this.getDiffPercent(pool.basePrice, swapOutput.updatedPool.basePrice),
       )
@@ -268,6 +279,10 @@ export class Rebalancing implements RebalancingInterface {
     const secondPoolKey = toSwap === 'base' ? 'quotePool' : 'basePool';
     const firstPool = pools.find((p) => p.tokenPair === row[firstPoolKey]);
     const secondPool = pools.find((p) => p.tokenPair === row[secondPoolKey]);
+    /**
+     * for now we only need outSymbol on second swap because intermediate swap goes always on SWAP.HIVE
+     */
+    const outSymbol = row.base === row[toSwap] ? row.quote : row.base;
     const firstSwap = this.swapHelper.getSwapOutput({
       symbol: row[toSwap],
       amountIn: quantityToSwap,
@@ -285,7 +300,7 @@ export class Rebalancing implements RebalancingInterface {
       symbol: ENGINE_TOKENS_SUPPORTED.SWAP_HIVE,
       amountIn: firstSwap.minAmountOut,
       slippage: DEFAULT_SLIPPAGE_MAX,
-      precision: DEFAULT_PRECISION,
+      precision: this.getPrecision(outSymbol),
       tradeFeeMul: DEFAULT_TRADE_FEE_MUL,
       pool: secondPool,
     });
@@ -361,6 +376,7 @@ export class Rebalancing implements RebalancingInterface {
     totalWalletIn,
     totalWalletOut,
     marketRatio,
+    precision,
   }: GetInitialQuantityInterface): string {
     //max formula
     const outToken = new BigNumber(0.5)
@@ -371,10 +387,7 @@ export class Rebalancing implements RebalancingInterface {
       )
       .toFixed(DEFAULT_PRECISION);
 
-    return new BigNumber(outToken)
-      .times(marketRatio)
-      .abs()
-      .toFixed(DEFAULT_PRECISION);
+    return new BigNumber(outToken).times(marketRatio).abs().toFixed(precision);
   }
 
   getEarnRebalance({
@@ -402,6 +415,7 @@ export class Rebalancing implements RebalancingInterface {
       marketRatio,
       totalWalletOut: row[`${toOut}Quantity`],
       totalWalletIn: row[`${toSwap}Quantity`],
+      precision: this.getPrecision(row[toSwap]),
     });
 
     let isRatioDiff, swapOutput, newBaseQuantity, newQuoteQuantity;
@@ -466,6 +480,7 @@ export class Rebalancing implements RebalancingInterface {
         quantityToSwap,
         newPercent,
         percentRatioDiff,
+        precision: this.getPrecision(row[toSwap]),
       });
     } while (isRatioDiff);
 
@@ -538,6 +553,8 @@ export class Rebalancing implements RebalancingInterface {
       ...REBALANCE_PAIRS_HIVE,
       ...REBALANCE_PAIRS_BTC,
       ...REBALANCE_PAIRS_ETH,
+      ...REBALANCE_PAIRS_SPS,
+      ...REBALANCE_PAIRS_DEC,
     ] as HoldingsType[];
     if (showAll) return initialValues;
 
@@ -589,6 +606,8 @@ export class Rebalancing implements RebalancingInterface {
       ...REBALANCE_PAIRS_HIVE,
       ...REBALANCE_PAIRS_BTC,
       ...REBALANCE_PAIRS_ETH,
+      ...REBALANCE_PAIRS_SPS,
+      ...REBALANCE_PAIRS_DEC,
     ];
     const balances = await this.getNoZeroBalance(account);
     const pools = await this.hiveEngineClient.getMarketPools({

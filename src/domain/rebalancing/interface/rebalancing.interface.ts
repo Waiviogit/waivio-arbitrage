@@ -99,6 +99,7 @@ export interface GetNewQuantityToSwapInterface {
   quantityToSwap: string;
   newPercent: string;
   percentRatioDiff: string;
+  precision: number;
 }
 
 export interface GetUserRebalanceTableInterface {
@@ -120,4 +121,5 @@ export interface GetInitialQuantityInterface {
   totalWalletOut: string;
   totalWalletIn: string;
   marketRatio: string;
+  precision: number;
 }
