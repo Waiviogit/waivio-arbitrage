@@ -1,9 +1,11 @@
 export const HIVE_ENGINE_NODES = [
-  'https://api.hive-engine.com/rpc', // Germany
-  'https://api2.hive-engine.com/rpc', // Finland
-  'https://herpc.dtools.dev', // Miami
-  'https://us.engine.rishipanthee.com', // Finland
-  'https://ha.herpc.dtools.dev', // New Jersey
+  'https://api2.hive-engine.com/rpc',
+  'https://herpc.dtools.dev',
+  'https://engine.rishipanthee.com',
+  'https://api.primersion.com',
+  'https://herpc.kanibot.com',
+  'https://api.hive-engine.com/rpc',
+  'https://ha.herpc.dtools.dev',
 ];
 
 export const TOKEN_WAIV = Object.freeze({

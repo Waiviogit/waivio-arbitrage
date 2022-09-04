@@ -33,12 +33,18 @@ export class HiveEngineClient implements HiveEngineClientInterface {
     id = ENGINE_ID.MAIN_NET,
   }: EngineQueryType): Promise<unknown> {
     try {
-      const resp = await axios.post(`${hostUrl}${endpoint}`, {
-        jsonrpc: '2.0',
-        method,
-        params,
-        id,
-      });
+      const resp = await axios.post(
+        `${hostUrl}${endpoint}`,
+        {
+          jsonrpc: '2.0',
+          method,
+          params,
+          id,
+        },
+        {
+          timeout: 5000,
+        },
+      );
       return _.get(resp, 'data.result');
     } catch (error) {
       this.logger.error(error.message);
