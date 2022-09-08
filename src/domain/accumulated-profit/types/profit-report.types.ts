@@ -7,4 +7,5 @@ export type ProfitReportRowType = {
   token: string;
   initial: string;
   current: string;
+  external: string;
 };

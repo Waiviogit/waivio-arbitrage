@@ -25,26 +25,20 @@ export class ProfitReport implements ProfitReportInterface {
     private readonly initialHoldingsRepository: InitialHoldingsRepositoryInterface,
   ) {}
 
-  addTokenToReport({
-    account,
-    symbol,
-    quantity,
-  }: EditReportInterface): Promise<InitialHoldingsDocumentType> {
-    return this.initialHoldingsRepository.create({
-      account,
-      symbol,
-      quantity,
-    });
+  addTokenToReport(
+    params: EditReportInterface,
+  ): Promise<InitialHoldingsDocumentType> {
+    return this.initialHoldingsRepository.create(params);
   }
 
-  editTokenQuantity({
-    account,
-    symbol,
-    quantity,
-  }: EditReportInterface): Promise<InitialHoldingsDocumentType> {
+  editTokenQuantity(
+    params: EditReportInterface,
+  ): Promise<InitialHoldingsDocumentType> {
+    const { account, symbol } = params;
+
     return this.initialHoldingsRepository.findOneAndUpdate({
       filter: { account, symbol },
-      update: { quantity },
+      update: _.omit(params, ['account', 'symbol']),
     });
   }
 
@@ -66,6 +60,7 @@ export class ProfitReport implements ProfitReportInterface {
       return {
         token: initial.symbol,
         initial: initial.quantity,
+        external: initial.externalQuantity,
         current: current ? current.balance : '0',
       };
     });
