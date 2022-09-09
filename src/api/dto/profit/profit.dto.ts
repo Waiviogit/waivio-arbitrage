@@ -5,6 +5,7 @@ import {
   IsString,
   IsNumberString,
   Validate,
+  IsOptional,
 } from 'class-validator';
 import { ENGINE_TOKENS_SUPPORTED } from '../../../domain/rebalancing/constants';
 import { CustomStringMin } from '../../../common/validators';
@@ -25,4 +26,10 @@ export class ProfitDto {
   @Validate(CustomStringMin, [0.00000001])
   @ApiProperty({ type: String })
   quantity: string;
+
+  @IsOptional()
+  @IsNumberString()
+  @Validate(CustomStringMin, [0.00000001])
+  @ApiProperty({ type: String, required: false })
+  externalQuantity?: string;
 }

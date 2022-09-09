@@ -27,6 +27,7 @@ export interface EditReportInterface {
   account: string;
   symbol: string;
   quantity: string;
+  externalQuantity?: string;
 }
 
 export interface DeleteTokenFromReportInterface {

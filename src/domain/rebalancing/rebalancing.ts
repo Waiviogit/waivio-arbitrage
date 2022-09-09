@@ -91,19 +91,28 @@ export class Rebalancing implements RebalancingInterface {
   }: GetPairRatioBalanceInterface): PairRatioBalanceType {
     const baseBalance = balances.find((b) => b.symbol === holding.base);
     const quoteBalance = balances.find((b) => b.symbol === holding.quote);
-    if (!baseBalance || !quoteBalance) {
-      return {
-        baseQuantity: !baseBalance ? '0' : baseBalance.balance,
-        quoteQuantity: !quoteBalance ? '0' : quoteBalance.balance,
-        holdingsRatio: '0',
-      };
-    }
+
+    const baseQuantity = !baseBalance
+      ? holding.baseExQuantity
+      : new BigNumber(baseBalance.balance)
+          .plus(holding.baseExQuantity)
+          .toFixed();
+
+    const quoteQuantity = !quoteBalance
+      ? holding.quoteExQuantity
+      : new BigNumber(quoteBalance.balance)
+          .plus(holding.quoteExQuantity)
+          .toFixed();
+
+    const holdingsRatio =
+      !baseBalance || !quoteBalance
+        ? '0'
+        : new BigNumber(quoteQuantity).div(baseQuantity).toFixed();
+
     return {
-      baseQuantity: baseBalance.balance,
-      quoteQuantity: quoteBalance.balance,
-      holdingsRatio: new BigNumber(quoteBalance.balance)
-        .div(baseBalance.balance)
-        .toFixed(),
+      baseQuantity,
+      quoteQuantity,
+      holdingsRatio,
     };
   }
 
@@ -395,10 +404,12 @@ export class Rebalancing implements RebalancingInterface {
     pools,
     slippage,
   }: GetEarnRebalanceInterface): EarnRebalanceType {
+    let red = false;
     const zeroResp = {
       earn: '0',
       rebalanceBase: `0 ${row.base}`,
       rebalanceQuote: `0 ${row.quote}`,
+      red,
     };
 
     if (new BigNumber(row.holdingsRatio).eq(0)) {
@@ -509,8 +520,18 @@ export class Rebalancing implements RebalancingInterface {
       quantity: swapOutput.amountOut,
     };
 
+    if (
+      new BigNumber(row[`${toSwap}Quantity`])
+        .minus(row[`${toSwap}ExQuantity`])
+        .lt(quantityToSwap)
+    ) {
+      swapOutput.json = null;
+      red = true;
+    }
+
     return {
       earn,
+      red,
       rebalanceBase,
       rebalanceQuote,
       json: swapOutput.json,
@@ -525,10 +546,12 @@ export class Rebalancing implements RebalancingInterface {
     pools,
   }: GetRebalanceTableRowsInterface): RebalanceTableRowType[] {
     for (const row of openMarkets as RebalanceTableRowType[]) {
-      const { earn, rebalanceBase, rebalanceQuote } = this.getEarnRebalance({
-        row,
-        pools,
-      });
+      const { earn, rebalanceBase, rebalanceQuote, red } =
+        this.getEarnRebalance({
+          row,
+          pools,
+        });
+      row.red = red;
       row.earn = formatTwoNumbersAfterZero(earn);
       row.rebalanceBase = rebalanceBase;
       row.rebalanceQuote = rebalanceQuote;
@@ -556,11 +579,25 @@ export class Rebalancing implements RebalancingInterface {
       ...REBALANCE_PAIRS_SPS,
       ...REBALANCE_PAIRS_DEC,
     ] as HoldingsType[];
-    if (showAll) return initialValues;
 
     const initialHoldings = await this.initialHoldingsRepository.find({
       filter: { account },
     });
+    for (const initialValue of initialValues) {
+      const externalBase = initialHoldings.find(
+        (el) => el.symbol === initialValue.base,
+      );
+      const externalQuote = initialHoldings.find(
+        (el) => el.symbol === initialValue.quote,
+      );
+      initialValue.baseExQuantity = externalBase
+        ? _.get(externalBase, 'externalQuantity', '0')
+        : '0';
+      initialValue.quoteExQuantity = externalBase
+        ? _.get(externalQuote, 'externalQuantity', '0')
+        : '0';
+    }
+    if (showAll) return initialValues;
     if (initialHoldings.length < 2) return initialValues;
     const tokensArr = initialHoldings.map((el) => el.symbol);
     return initialValues.filter(
@@ -601,14 +638,10 @@ export class Rebalancing implements RebalancingInterface {
     account,
     pair,
   }: GetUserSwapParamsInterface): Promise<UserSwapParamsType> {
-    const initialValues = [
-      ...REBALANCE_PAIRS_WAIV,
-      ...REBALANCE_PAIRS_HIVE,
-      ...REBALANCE_PAIRS_BTC,
-      ...REBALANCE_PAIRS_ETH,
-      ...REBALANCE_PAIRS_SPS,
-      ...REBALANCE_PAIRS_DEC,
-    ];
+    const initialValues = await this.getInitialValues({
+      account,
+      showAll: true,
+    });
     const balances = await this.getNoZeroBalance(account);
     const pools = await this.hiveEngineClient.getMarketPools({
       tokenPair: { $in: REBALANCING_POOLS },
