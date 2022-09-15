@@ -48,7 +48,7 @@ export class HiveEngineClient implements HiveEngineClientInterface {
       return _.get(resp, 'data.result');
     } catch (error) {
       this.logger.error(error.message);
-      return { error };
+      return error;
     }
   }
 
@@ -111,11 +111,16 @@ export class HiveEngineClient implements HiveEngineClientInterface {
     })) as MarketPoolType[];
   }
 
-  async getBlock(blockNumber: number): Promise<EngineBlockType> {
+  async getBlock(
+    blockNumber: number,
+    hostUrl: string,
+  ): Promise<EngineBlockType> {
     return (await this.engineProxy({
       method: ENGINE_METHOD.GET_BLOCK_INFO,
       endpoint: ENGINE_ENDPOINT.BLOCKCHAIN,
       params: { blockNumber },
+      hostUrl,
+      attempts: 1,
     })) as EngineBlockType;
   }
 

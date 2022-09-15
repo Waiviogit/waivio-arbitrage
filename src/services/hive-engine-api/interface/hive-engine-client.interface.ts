@@ -12,7 +12,7 @@ export interface HiveEngineClientInterface {
 
   getMarketPools(query: object): Promise<MarketPoolType[]>;
 
-  getBlock(blockNumber: number): Promise<EngineBlockType>;
+  getBlock(blockNumber: number, hostUrl: string): Promise<EngineBlockType>;
 
   getVotingPower(
     account: string,

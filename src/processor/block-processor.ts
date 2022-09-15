@@ -6,7 +6,10 @@ import {
   REDIS_KEY,
 } from '../redis/constants/redis.constants';
 import { HiveEngineClientInterface } from '../services/hive-engine-api/interface';
-import { HIVE_ENGINE_PROVIDE } from '../services/hive-engine-api/constants';
+import {
+  HIVE_ENGINE_NODES,
+  HIVE_ENGINE_PROVIDE,
+} from '../services/hive-engine-api/constants';
 import { ENGINE_PARSER_PROVIDERS } from './engine-parser/constants/provider';
 import { EngineParserInterface } from './engine-parser/interfaces/engine-parser.interface';
 
@@ -16,6 +19,7 @@ export class BlockProcessor {
   private readonly _logger = new Logger(BlockProcessor.name);
   private readonly _redisBlockKey: string = REDIS_KEY.LAST_BLOCK;
   private readonly _startDefaultBlock: number = DEFAULT_START_ENGINE_BLOCK;
+  private hostUrl = HIVE_ENGINE_NODES[0];
 
   constructor(
     @Inject(REDIS_PROVIDERS.BLOCK_PROCESSOR)
@@ -52,7 +56,15 @@ export class BlockProcessor {
   }
 
   private async _processBlock(blockNumber: number): Promise<boolean> {
-    const block = await this._hiveEngineApiDomain.getBlock(blockNumber);
+    const block = await this._hiveEngineApiDomain.getBlock(
+      blockNumber,
+      this.hostUrl,
+    );
+    if (block instanceof Error) {
+      this.changUrl(this.hostUrl);
+      this._logger.log(this.hostUrl);
+      return false;
+    }
     if (block && (!block.transactions || !block.transactions[0])) {
       this._logger.log(`EMPTY BLOCK: ${blockNumber}`);
 
@@ -68,9 +80,21 @@ export class BlockProcessor {
   }
 
   private async _getBlockNumber(): Promise<number> {
-    const blockNumber = await this._redisProcessorClient.get(this._redisBlockKey);
+    const blockNumber = await this._redisProcessorClient.get(
+      this._redisBlockKey,
+    );
     if (blockNumber) return +blockNumber;
 
     return this._startDefaultBlock;
+  }
+
+  private changUrl(hostUrl): void {
+    const index = hostUrl ? HIVE_ENGINE_NODES.indexOf(hostUrl) : 0;
+
+    if (index === HIVE_ENGINE_NODES.length - 1) {
+      this.hostUrl = HIVE_ENGINE_NODES[0];
+    } else {
+      this.hostUrl = HIVE_ENGINE_NODES[index + 1];
+    }
   }
 }
