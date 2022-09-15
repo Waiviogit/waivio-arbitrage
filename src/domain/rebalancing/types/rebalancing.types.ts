@@ -7,7 +7,9 @@ export type HoldingsType = {
   base: string;
   quote: string;
   baseQuantity: string;
+  baseExQuantity: string;
   quoteQuantity: string;
+  quoteExQuantity: string;
   holdingsRatio: string;
   directPool: boolean;
   basePool?: string;
@@ -21,6 +23,7 @@ export type OpenMarketType = HoldingsType & PoolMarket;
 
 export type RebalanceTableRowType = OpenMarketType & {
   earn: string;
+  red: boolean;
   rebalanceBase: string;
   rebalanceQuote: string;
 };
@@ -44,6 +47,7 @@ export type EarnRebalanceType = {
   from?: FromToRebalanceType;
   to?: FromToRebalanceType;
   priceImpact?: string;
+  red: boolean;
 };
 
 export type FromToRebalanceType = {

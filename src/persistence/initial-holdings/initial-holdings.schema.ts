@@ -10,6 +10,9 @@ export class InitialHoldings {
 
   @Prop({ type: String, required: true })
   quantity: string;
+
+  @Prop({ type: String, default: '0' })
+  externalQuantity?: string;
 }
 
 export const InitialHoldingsSchema =

@@ -32,6 +32,7 @@ export interface CreateHoldingsInterface {
   account: string;
   symbol: string;
   quantity: string;
+  externalQuantity?: string;
 }
 
 export interface InitialHoldingsFindInterface {

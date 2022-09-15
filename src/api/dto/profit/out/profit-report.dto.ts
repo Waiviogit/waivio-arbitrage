@@ -10,6 +10,9 @@ class ProfitReportRowDto {
 
   @ApiProperty({ type: String })
   current: string;
+
+  @ApiProperty({ type: String })
+  external: string;
 }
 
 export class ProfitReportDto {
