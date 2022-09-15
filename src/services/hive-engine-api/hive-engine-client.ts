@@ -67,7 +67,7 @@ export class HiveEngineClient implements HiveEngineClientInterface {
       endpoint,
       id,
     });
-    if (_.has(response, 'error')) {
+    if (response instanceof Error) {
       if (attempts <= 0) return response;
       return this.engineProxy({
         hostUrl: this.getNewNodeUrl(hostUrl),
@@ -120,7 +120,7 @@ export class HiveEngineClient implements HiveEngineClientInterface {
       endpoint: ENGINE_ENDPOINT.BLOCKCHAIN,
       params: { blockNumber },
       hostUrl,
-      attempts: 1,
+      attempts: 0,
     })) as EngineBlockType;
   }
 
