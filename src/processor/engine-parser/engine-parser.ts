@@ -27,7 +27,7 @@ import { USER_REBALANCING_PROVIDE } from '../../persistence/user-rebalancing/con
 import {
   CheckDifferencePercentChangeType,
   CheckNotificationSentRecentlyType,
-  PrepareNotificationType
+  PrepareNotificationType,
 } from './types/engine-parser.types';
 
 @Injectable()
@@ -117,30 +117,33 @@ export class EngineParser implements EngineParserInterface {
     users: UserRebalancingDocumentType[],
   ): Promise<NotificationDataType[]> {
     const dataForNotifications = [];
-    for (const user of users) {
-      const userAndMarketInfo =
-        await this._rebalancingDomain.getUserRebalanceTable({
-          account: user.account,
-          showAll: true,
-        });
-      const pools = userAndMarketInfo.table.filter((pool) =>
-        Object.keys(user.toObject()).some(
-          (pair) =>
-            pool.active &&
-            pool.dbField.includes(pair) &&
-            new BigNumber(pool.difference).abs().gte(user.differencePercent),
-        ),
-      );
-      if (pools.length) {
-        dataForNotifications.push(
-          ...(await this._prepareNotificationData({
-            pools,
+    if (_.isEmpty(users)) return dataForNotifications;
+    await Promise.all(
+      users.map(async (user) => {
+        const userAndMarketInfo =
+          await this._rebalancingDomain.getUserRebalanceTable({
             account: user.account,
-            differencePercentSubscription: user.differencePercent,
-          })),
+            showAll: true,
+          });
+        const pools = userAndMarketInfo.table.filter((pool) =>
+          Object.keys(user.toObject()).some(
+            (pair) =>
+              pool.active &&
+              pool.dbField.includes(pair) &&
+              new BigNumber(pool.difference).abs().gte(user.differencePercent),
+          ),
         );
-      }
-    }
+        if (pools.length) {
+          dataForNotifications.push(
+            ...(await this._prepareNotificationData({
+              pools,
+              account: user.account,
+              differencePercentSubscription: user.differencePercent,
+            })),
+          );
+        }
+      }),
+    );
 
     return dataForNotifications;
   }
@@ -153,10 +156,10 @@ export class EngineParser implements EngineParserInterface {
     const dataForNotifications = [];
     for (const pool of pools) {
       const recentNotification = await this._checkIfNotificationSentRecently({
-          pool,
-          account,
-          differencePercentSubscription
-        });
+        pool,
+        account,
+        differencePercentSubscription,
+      });
       if (recentNotification) continue;
 
       const differencePercent = new BigNumber(pool.difference).toFixed(2);
