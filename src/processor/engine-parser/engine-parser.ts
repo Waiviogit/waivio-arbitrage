@@ -160,7 +160,7 @@ export class EngineParser implements EngineParserInterface {
         account,
         differencePercentSubscription,
       });
-      if (recentNotification) return;
+      if (recentNotification) continue;
 
       const differencePercent = new BigNumber(pool.difference).toFixed(2);
       dataForNotifications.push({
