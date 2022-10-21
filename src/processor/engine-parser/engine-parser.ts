@@ -118,34 +118,31 @@ export class EngineParser implements EngineParserInterface {
   ): Promise<NotificationDataType[]> {
     const dataForNotifications = [];
     if (_.isEmpty(users)) return dataForNotifications;
-    await Promise.all(
-      users.map(async (user) => {
-        const userAndMarketInfo =
-          await this._rebalancingDomain.getUserRebalanceTable({
-            account: user.account,
-            showAll: true,
-          });
-        const pools = userAndMarketInfo.table.filter((pool) =>
-          Object.keys(user).some(
-            (pair) =>
-              pool.active &&
-              pool.dbField.includes(pair) &&
-              new BigNumber(pool.difference)
-                .abs()
-                .gte(user.differencePercent) &&
-              new BigNumber(user.differencePercent).toNumber() !== 0,
-          ),
-        );
-        if (pools.length) {
-          const notifications = await this._prepareNotificationData({
-            pools,
-            account: user.account,
-            differencePercentSubscription: user.differencePercent,
-          });
-          dataForNotifications.push(...notifications);
-        }
-      }),
-    );
+
+    for (const user of users) {
+      const userAndMarketInfo =
+        await this._rebalancingDomain.getUserRebalanceTable({
+          account: user.account,
+          showAll: true,
+        });
+      const pools = userAndMarketInfo.table.filter((pool) =>
+        Object.keys(user).some(
+          (pair) =>
+            pool.active &&
+            pool.dbField.includes(pair) &&
+            new BigNumber(pool.difference).abs().gte(user.differencePercent) &&
+            new BigNumber(user.differencePercent).toNumber() !== 0,
+        ),
+      );
+      if (pools.length) {
+        const notifications = await this._prepareNotificationData({
+          pools,
+          account: user.account,
+          differencePercentSubscription: user.differencePercent,
+        });
+        dataForNotifications.push(...notifications);
+      }
+    }
 
     return dataForNotifications;
   }
@@ -156,28 +153,27 @@ export class EngineParser implements EngineParserInterface {
     differencePercentSubscription,
   }: PrepareNotificationType): Promise<NotificationDataType[]> {
     const dataForNotifications = [];
-    await Promise.all(
-      pools.map(async (pool) => {
-        const recentNotification = await this._checkIfNotificationSentRecently({
-          pool,
-          account,
-          differencePercentSubscription,
-        });
-        if (recentNotification) return;
 
-        const differencePercent = new BigNumber(pool.difference).toFixed(2);
-        dataForNotifications.push({
-          account,
-          differencePercent: differencePercent.replace('-', ''),
-          tokenPair: pool.dbField.replace('_', ' / '),
-        });
-        await this._redisNotificationClient.zadd({
-          key: `rebalancing:${account}`,
-          score: moment.utc().unix(),
-          value: `${pool.dbField}:${differencePercent}`,
-        });
-      }),
-    );
+    for (const pool of pools) {
+      const recentNotification = await this._checkIfNotificationSentRecently({
+        pool,
+        account,
+        differencePercentSubscription,
+      });
+      if (recentNotification) return;
+
+      const differencePercent = new BigNumber(pool.difference).toFixed(2);
+      dataForNotifications.push({
+        account,
+        differencePercent: differencePercent.replace('-', ''),
+        tokenPair: pool.dbField.replace('_', ' / '),
+      });
+      await this._redisNotificationClient.zadd({
+        key: `rebalancing:${account}`,
+        score: moment.utc().unix(),
+        value: `${pool.dbField}:${differencePercent}`,
+      });
+    }
 
     return dataForNotifications;
   }
