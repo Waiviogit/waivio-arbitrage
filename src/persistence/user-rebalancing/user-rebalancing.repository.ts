@@ -45,7 +45,7 @@ export class UserRebalancingRepository
     options,
   }: UserRebalancingFindInterface): Promise<UserRebalancingDocumentType[]> {
     try {
-      return await this.model.find(filter, projection, options);
+      return await this.model.find(filter, projection, options).lean();
     } catch (error) {
       this.logger.error(error.message);
     }
