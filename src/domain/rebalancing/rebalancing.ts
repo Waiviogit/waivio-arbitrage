@@ -609,14 +609,14 @@ export class Rebalancing implements RebalancingInterface {
     account,
     showAll,
   }: GetUserRebalanceTableInterface): Promise<UserRebalanceTableType> {
-    const [user, initialValues, balances, pools] = await Promise.all([
+    const [user, balances, pools] = await Promise.all([
       this.userRebalancingRepository.findOneOrCreate(account),
-      this.getInitialValues({ account, showAll }),
       this.getNoZeroBalance(account),
       this.hiveEngineClient.getMarketPools({
         tokenPair: { $in: REBALANCING_POOLS },
       }),
     ]);
+    const initialValues = await this.getInitialValues({ account, showAll });
 
     const holdings = this.calcHoldings({ balances, initialValues });
     const holdingsWithStatus = this.addActiveStatusOnPairs({ user, holdings });
