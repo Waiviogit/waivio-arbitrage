@@ -1,5 +1,4 @@
 export const HIVE_ENGINE_NODES = [
-  'https://api2.hive-engine.com/rpc',
   'https://herpc.dtools.dev',
   'https://engine.rishipanthee.com',
   'https://api.primersion.com',
