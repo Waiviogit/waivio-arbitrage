@@ -29,7 +29,7 @@ export class ProfitDto {
 
   @IsOptional()
   @IsNumberString()
-  @Validate(CustomStringMin, [0.00000001])
+  @Validate(CustomStringMin, [0])
   @ApiProperty({ type: String, required: false })
   externalQuantity?: string;
 }
