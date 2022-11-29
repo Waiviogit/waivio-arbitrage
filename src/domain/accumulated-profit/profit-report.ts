@@ -70,7 +70,7 @@ export class ProfitReport implements ProfitReportInterface {
     const { before, after } = table.reduce(
       (acc, el) => {
         acc.before = acc.before.times(el.initial);
-        acc.after = acc.after.times(el.current);
+        acc.after = acc.after.times(el.current).plus(el.external || 0);
         return acc;
       },
       { before: new BigNumber(1), after: new BigNumber(1) },
