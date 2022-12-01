@@ -7,8 +7,7 @@ import {
 } from '../../../domain/accumulated-profit/interface';
 import { InitialHoldingsDocumentType } from '../../../persistence/initial-holdings/types';
 import { ProfitReportType } from '../../../domain/accumulated-profit/types';
-import BigNumber from 'bignumber.js';
-import { DEFAULT_PRECISION } from '../../../domain/rebalancing/constants';
+import { ENGINE_TOKENS_SUPPORTED } from '../../../domain/rebalancing/constants';
 
 @Injectable()
 export class ProfitService {
@@ -37,5 +36,9 @@ export class ProfitService {
 
   async getProfitReport(account: string): Promise<ProfitReportType> {
     return this.profitReport.getProfitReport(account);
+  }
+
+  async getTokens(): Promise<string[]> {
+    return Object.values(ENGINE_TOKENS_SUPPORTED);
   }
 }

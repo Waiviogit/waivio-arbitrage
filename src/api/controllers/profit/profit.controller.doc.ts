@@ -88,4 +88,18 @@ export class ProfitControllerDoc {
       }),
     );
   }
+
+  static getTokens(): MethodDecorator {
+    return applyDecorators(
+      ApiOperation({
+        summary: 'endpoint available tokens',
+        description: 'endpoint available tokens',
+      }),
+      ApiResponse({
+        status: HttpStatus.OK,
+        description: 'available tokens',
+        type: [String],
+      }),
+    );
+  }
 }

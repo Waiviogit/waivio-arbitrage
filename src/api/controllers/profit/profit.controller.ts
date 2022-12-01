@@ -67,4 +67,10 @@ export class ProfitController {
   async getReport(@Param('account') account: string): Promise<ProfitReportDto> {
     return this.profitService.getProfitReport(account);
   }
+
+  @Get('tokens')
+  @ProfitControllerDoc.getTokens()
+  async getTokens(): Promise<string[]> {
+    return this.profitService.getTokens();
+  }
 }
