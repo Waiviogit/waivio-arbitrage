@@ -58,16 +58,16 @@ export class ProfitReport implements ProfitReportInterface {
     return initialBalances.map((initial) => {
       const current = balances.find((b) => b.symbol === initial.symbol);
 
-      const externalQuantity = initial.externalQuantity;
+      const external = initial.externalQuantity;
       const currentBalance = current
         ? new BigNumber(current.balance)
             .plus(initial.externalQuantity)
             .toFixed()
         : initial.externalQuantity;
 
-      const percentExternal = new BigNumber(100)
-        .times(externalQuantity)
-        .div(externalQuantity)
+      const externalPercent = new BigNumber(100)
+        .times(external)
+        .div(currentBalance)
         .toFixed(2);
 
       return {
@@ -76,7 +76,8 @@ export class ProfitReport implements ProfitReportInterface {
           .plus(initial.externalQuantity)
           .toFixed(),
         current: currentBalance,
-        external: `${externalQuantity} (${percentExternal}%)`,
+        external,
+        externalPercent,
       };
     });
   }
