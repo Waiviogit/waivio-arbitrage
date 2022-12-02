@@ -57,11 +57,26 @@ export class ProfitReport implements ProfitReportInterface {
   }: MapCurrentBalanceInterface): ProfitReportRowType[] {
     return initialBalances.map((initial) => {
       const current = balances.find((b) => b.symbol === initial.symbol);
+
+      const externalQuantity = initial.externalQuantity;
+      const currentBalance = current
+        ? new BigNumber(current.balance)
+            .plus(initial.externalQuantity)
+            .toFixed()
+        : initial.externalQuantity;
+
+      const percentExternal = new BigNumber(100)
+        .times(externalQuantity)
+        .div(externalQuantity)
+        .toFixed(2);
+
       return {
         token: initial.symbol,
-        initial: initial.quantity,
-        external: initial.externalQuantity,
-        current: current ? current.balance : '0',
+        initial: new BigNumber(initial.quantity)
+          .plus(initial.externalQuantity)
+          .toFixed(),
+        current: currentBalance,
+        external: `${externalQuantity} (${percentExternal}%)`,
       };
     });
   }
@@ -70,9 +85,7 @@ export class ProfitReport implements ProfitReportInterface {
     const { before, after } = table.reduce(
       (acc, el) => {
         acc.before = acc.before.times(el.initial);
-        acc.after = acc.after.times(
-          new BigNumber(el.current).plus(el.external || 0),
-        );
+        acc.after = acc.after.times(el.current);
         return acc;
       },
       { before: new BigNumber(1), after: new BigNumber(1) },
