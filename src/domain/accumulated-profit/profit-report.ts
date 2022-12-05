@@ -75,6 +75,7 @@ export class ProfitReport implements ProfitReportInterface {
         initial: new BigNumber(initial.quantity)
           .plus(initial.externalQuantity)
           .toFixed(),
+        initialEdit: initial.quantity,
         current: currentBalance,
         external,
         externalPercent,
