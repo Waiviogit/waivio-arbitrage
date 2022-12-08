@@ -654,14 +654,21 @@ export class Rebalancing implements RebalancingInterface {
       holding: rebalancePair,
       balances,
     });
-    Object.assign(rebalancePair, walletRatio);
+
     const marketRatio = this.getPoolMarket({
-      market: rebalancePair,
+      market: {
+        ...rebalancePair,
+        ...walletRatio,
+      },
       pools,
     });
-    Object.assign(rebalancePair, marketRatio);
+
     const earnRebalance = this.getEarnRebalance({
-      row: rebalancePair,
+      row: {
+        ...rebalancePair,
+        ...walletRatio,
+        ...marketRatio,
+      },
       pools,
     });
     if (!earnRebalance.json) {
