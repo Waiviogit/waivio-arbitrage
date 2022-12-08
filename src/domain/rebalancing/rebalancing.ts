@@ -26,6 +26,7 @@ import {
   SwapHelperInterface,
 } from '../../services/hive-engine-api/interface';
 import {
+  DB_REBALANCING_FIELD,
   DEFAULT_PRECISION,
   DEFAULT_SLIPPAGE,
   DEFAULT_SLIPPAGE_MAX,
@@ -572,12 +573,149 @@ export class Rebalancing implements RebalancingInterface {
     showAll,
   }: GetInitialValuesInterface): Promise<HoldingsType[]> {
     const initialValues = [
-      ...REBALANCE_PAIRS_WAIV,
-      ...REBALANCE_PAIRS_HIVE,
-      ...REBALANCE_PAIRS_BTC,
-      ...REBALANCE_PAIRS_ETH,
-      ...REBALANCE_PAIRS_SPS,
-      ...REBALANCE_PAIRS_DEC,
+      {
+        base: ENGINE_TOKENS_SUPPORTED.WAIV,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_BTC,
+        directPool: false,
+        basePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.WAIV}`,
+        quotePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_BTC}`,
+        dbField: DB_REBALANCING_FIELD.WAIV_BTC,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.WAIV,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_HBD,
+        directPool: false,
+        basePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.WAIV}`,
+        quotePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_HBD}`,
+        dbField: DB_REBALANCING_FIELD.WAIV_HBD,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.WAIV,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_ETH,
+        directPool: false,
+        basePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.WAIV}`,
+        quotePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_ETH}`,
+        dbField: DB_REBALANCING_FIELD.WAIV_ETH,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.WAIV,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_LTC,
+        directPool: false,
+        basePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.WAIV}`,
+        quotePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_LTC}`,
+        dbField: DB_REBALANCING_FIELD.WAIV_LTC,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SWAP_HIVE,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_HBD,
+        directPool: true,
+        pool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_HBD}`,
+        dbField: DB_REBALANCING_FIELD.HIVE_HBD,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SWAP_HIVE,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_BTC,
+        directPool: true,
+        pool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_BTC}`,
+        dbField: DB_REBALANCING_FIELD.HIVE_BTC,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SWAP_HIVE,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_ETH,
+        directPool: true,
+        pool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_ETH}`,
+        dbField: DB_REBALANCING_FIELD.HIVE_ETH,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SWAP_HIVE,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_LTC,
+        directPool: true,
+        pool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_LTC}`,
+        dbField: DB_REBALANCING_FIELD.HIVE_LTC,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SWAP_BTC,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_ETH,
+        directPool: true,
+        pool: `${ENGINE_TOKENS_SUPPORTED.SWAP_BTC}:${ENGINE_TOKENS_SUPPORTED.SWAP_ETH}`,
+        dbField: DB_REBALANCING_FIELD.BTC_ETH,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SWAP_BTC,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_HBD,
+        directPool: false,
+        basePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_BTC}`,
+        quotePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_HBD}`,
+        dbField: DB_REBALANCING_FIELD.BTC_HBD,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SWAP_ETH,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_HBD,
+        directPool: false,
+        basePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_ETH}`,
+        quotePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_HBD}`,
+        dbField: DB_REBALANCING_FIELD.ETH_HBD,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SPS,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_HIVE,
+        directPool: true,
+        pool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SPS}`,
+        dbField: DB_REBALANCING_FIELD.SPS_HIVE,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SPS,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_ETH,
+        directPool: true,
+        pool: `${ENGINE_TOKENS_SUPPORTED.SWAP_ETH}:${ENGINE_TOKENS_SUPPORTED.SPS}`,
+        dbField: DB_REBALANCING_FIELD.SPS_ETH,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SPS,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_BTC,
+        directPool: true,
+        pool: `${ENGINE_TOKENS_SUPPORTED.SWAP_BTC}:${ENGINE_TOKENS_SUPPORTED.SPS}`,
+        dbField: DB_REBALANCING_FIELD.SPS_BTC,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.SPS,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_LTC,
+        directPool: false,
+        basePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SPS}`,
+        quotePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_LTC}`,
+        dbField: DB_REBALANCING_FIELD.SPS_LTC,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.DEC,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_HIVE,
+        directPool: true,
+        pool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.DEC}`,
+        dbField: DB_REBALANCING_FIELD.DEC_HIVE,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.DEC,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_ETH,
+        directPool: false,
+        basePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.DEC}`,
+        quotePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_ETH}`,
+        dbField: DB_REBALANCING_FIELD.DEC_ETH,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.DEC,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_BTC,
+        directPool: false,
+        basePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.DEC}`,
+        quotePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_BTC}`,
+        dbField: DB_REBALANCING_FIELD.DEC_BTC,
+      },
+      {
+        base: ENGINE_TOKENS_SUPPORTED.DEC,
+        quote: ENGINE_TOKENS_SUPPORTED.SWAP_LTC,
+        directPool: false,
+        basePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.DEC}`,
+        quotePool: `${ENGINE_TOKENS_SUPPORTED.SWAP_HIVE}:${ENGINE_TOKENS_SUPPORTED.SWAP_LTC}`,
+        dbField: DB_REBALANCING_FIELD.DEC_LTC,
+      },
     ] as HoldingsType[];
 
     const initialHoldings = await this.initialHoldingsRepository.find({
@@ -655,20 +793,17 @@ export class Rebalancing implements RebalancingInterface {
       balances,
     });
 
+    Object.assign(rebalancePair, walletRatio);
+
     const marketRatio = this.getPoolMarket({
-      market: {
-        ...rebalancePair,
-        ...walletRatio,
-      },
+      market: rebalancePair,
       pools,
     });
 
+    Object.assign(rebalancePair, marketRatio);
+
     const earnRebalance = this.getEarnRebalance({
-      row: {
-        ...rebalancePair,
-        ...walletRatio,
-        ...marketRatio,
-      },
+      row: rebalancePair,
       pools,
     });
     if (!earnRebalance.json) {
