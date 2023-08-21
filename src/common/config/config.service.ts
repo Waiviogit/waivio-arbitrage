@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import process from 'process';
+import * as process from 'process';
 
 dotenv.config();
 
